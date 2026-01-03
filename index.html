@@ -74,7 +74,6 @@
 </div>
 
 <script>
-    // --- CONFIGURATION ---
     const SUPABASE_URL = "https://jvrxmnvetjftssflgela.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -83,83 +82,78 @@
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
 
-    // Initialize IntaSend outside the function
-    const intasend = new IntaSend({
-        public_key: INTASEND_KEY,
-        live: false 
-    });
-
     window.addEventListener('DOMContentLoaded', () => {
         startCountdown();
         updateFomoDisplay();
+        
+        // CHECK FOR REDIRECT SUCCESS
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('checkout_id') && urlParams.has('name')) {
+            handleSuccessfulRedirect(urlParams);
+        }
     });
 
-    // --- UPDATED PAYMENT LOGIC ---
     document.getElementById('ticketForm').onsubmit = async (e) => {
         e.preventDefault();
-        
         const btn = document.getElementById('submitBtn');
         const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
         const type = document.getElementById('type').value;
-        const amount = PRICES[type];
-
+        
         let formattedPhone = phone.replace(/\D/g, ""); 
-        if (formattedPhone.startsWith("0")) {
-            formattedPhone = "254" + formattedPhone.substring(1);
-        }
+        if (formattedPhone.startsWith("0")) formattedPhone = "254" + formattedPhone.substring(1);
 
-        btn.innerText = "Processing...";
+        btn.innerText = "Redirecting to Payment...";
         btn.disabled = true;
 
-        try {
-            // Use .run() instead of .checkout()
-            intasend.run({
-                amount: amount,
-                currency: "KES",
-                phone_number: formattedPhone,
-                email: "guest@mutcu.com"
-            })
-            .on("COMPLETE", async (results) => {
-                const mpesaCode = results.transaction_id || "TEST_MODE";
-                
-                let groupNames = "";
-                document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
+        // Use IntaSend Redirection to avoid the "Processing" hang
+        const intasend = new IntaSend({
+            public_key: INTASEND_KEY,
+            live: false 
+        });
 
-                const { data, error } = await _supabase.from('tickets').insert([{
-                    name: name,
-                    phone: formattedPhone,
-                    ticket_type: type,
-                    mpesa_code: mpesaCode,
-                    group_members: groupNames,
-                    status: 'approved' 
-                }]).select();
+        // We pass the data in the URL so we can save it to Supabase after the user returns
+        let groupNames = "";
+        document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
+        
+        const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${formattedPhone}&type=${encodeURIComponent(type)}&members=${encodeURIComponent(groupNames)}`;
 
-                if (error) {
-                    alert("Database Error: " + error.message);
-                } else {
-                    document.getElementById('ticketForm').classList.add('hidden');
-                    document.getElementById('statusArea').classList.remove('hidden');
-                    renderTicket(data[0]);
-                }
-            })
-            .on("FAILED", (results) => {
-                alert("Payment window closed or failed.");
-                btn.disabled = false;
-                btn.innerText = "Pay and Get Ticket";
-            })
-            .on("IN-PROGRESS", () => {
-                btn.innerText = "Awaiting PIN...";
-            });
-
-        } catch (err) {
-            console.error("Intasend error:", err);
-            alert("Payment initialization failed.");
-            btn.disabled = false;
-            btn.innerText = "Pay and Get Ticket";
-        }
+        intasend.run({
+            amount: PRICES[type],
+            currency: "KES",
+            phone_number: formattedPhone,
+            email: "guest@mutcu.com",
+            redirect_url: returnUrl
+        });
     };
 
+    async function handleSuccessfulRedirect(params) {
+        const statusArea = document.getElementById('statusArea');
+        const ticketForm = document.getElementById('ticketForm');
+        
+        ticketForm.classList.add('hidden');
+        statusArea.classList.remove('hidden');
+        statusArea.innerHTML = "<h3>Finalizing your ticket...</h3>";
+
+        const { data, error } = await _supabase.from('tickets').insert([{
+            name: params.get('name'),
+            phone: params.get('phone'),
+            ticket_type: params.get('type'),
+            mpesa_code: params.get('checkout_id'), // Use checkout_id as ref
+            group_members: params.get('members'),
+            status: 'approved' 
+        }]).select();
+
+        if (!error) {
+            renderTicket(data[0]);
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+            statusArea.innerHTML = "Error saving ticket: " + error.message;
+        }
+    }
+
+    // --- REMAINDER OF UTILITY FUNCTIONS (renderTicket, download, etc) ---
     function renderTicket(data) {
         const statusArea = document.getElementById('statusArea');
         statusArea.innerHTML = `
@@ -171,55 +165,18 @@
                 <div style="border-top:1px dashed #ccc; padding-top:15px;">
                     <div style="font-weight:900; font-size:1.1rem;">${data.name}</div>
                     <div style="font-size:11px; color:#666; margin-top:5px;">REF: ${data.mpesa_code}</div>
-                    <div style="font-size:10px; color:var(--brand-pink); font-weight:bold; margin-top:2px;">ID: ${data.id}</div>
                 </div>
             </div>
             <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer;">💾 Save to Gallery</button>
         `;
-        
-        new QRCode(document.getElementById("qrcode"), { 
-            text: `ID:${data.id}`, width: 160, height: 160, colorDark : "#04162e", colorLight : "#ffffff"
-        });
-    }
-
-    async function showRetrievePrompt() {
-        const code = prompt("Enter your M-Pesa Transaction Code:");
-        if (!code) return;
-        
-        const { data, error } = await _supabase.from('tickets')
-            .select('*')
-            .eq('mpesa_code', code.toUpperCase().trim())
-            .single();
-
-        if (data) {
-            document.getElementById('ticketForm').classList.add('hidden');
-            document.getElementById('statusArea').classList.remove('hidden');
-            renderTicket(data);
-        } else {
-            alert("No ticket found with that code.");
-        }
-    }
-
-    async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
-        const link = document.createElement('a');
-        link.download = `MUTCU_Ticket.png`;
-        link.href = canvas.toDataURL();
-        link.click();
+        new QRCode(document.getElementById("qrcode"), { text: `ID:${data.id}`, width: 160, height: 160 });
     }
 
     async function updateFomoDisplay() {
-        try {
-            const type = document.getElementById('type').value;
-            const { count } = await _supabase.from('tickets')
-                .select('*', { count: 'exact', head: true })
-                .eq('ticket_type', type);
-            
-            const remaining = CAPACITY[type] - (count || 0);
-            document.getElementById('availabilityMsg').innerText = remaining > 0 ? `${remaining} tickets left` : "SOLD OUT";
-        } catch (e) {
-            console.log("Fomo display error", e);
-        }
+        const type = document.getElementById('type').value;
+        const { count } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
+        const remaining = CAPACITY[type] - (count || 0);
+        document.getElementById('availabilityMsg').innerText = remaining > 0 ? `${remaining} tickets left` : "SOLD OUT";
     }
 
     function toggleGroupFields() {
@@ -237,6 +194,27 @@
             document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
             document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
         }, 1000);
+    }
+
+    async function downloadTicket() {
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
+        const link = document.createElement('a');
+        link.download = `MUTCU_Ticket.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    async function showRetrievePrompt() {
+        const code = prompt("Enter your M-Pesa Transaction Code:");
+        if (!code) return;
+        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code.toUpperCase().trim()).single();
+        if (data) {
+            document.getElementById('ticketForm').classList.add('hidden');
+            document.getElementById('statusArea').classList.remove('hidden');
+            renderTicket(data);
+        } else {
+            alert("No ticket found.");
+        }
     }
 </script>
 
