@@ -37,11 +37,16 @@
                 <input type="tel" id="phone" placeholder="0712..." required>
                 
                 <label>Ticket Category</label>
-                <select id="type" onchange="toggleGroupFields()">
+                <select id="type" onchange="updateFomoDisplay(); toggleGroupFields();">
                     <option value="Regular">Regular Admission — 100/-</option>
                     <option value="VIP">VIP Access — 200/-</option>
                     <option value="Group of 5">Group of 5 — 400/-</option>
                 </select>
+
+                <div id="fomoBox" style="margin-top: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between;">
+                    <span id="availabilityMsg" style="color: #4fd1c5;">Checking availability...</span>
+                    <span id="lowStockAlert" class="hidden" style="color: #ff4b2b; animation: pulse 1.5s infinite;">🔥 Selling Fast!</span>
+                </div>
 
                 <div id="groupFields" class="hidden">
                     <label>Other Member Names</label>
@@ -52,7 +57,7 @@
                 </div>
 
                 <label>M-Pesa Transaction Code</label>
-                <input type="text" id="code" placeholder="e.g. SAK8..." required>
+                <input type="text" id="code" placeholder="e.g. SAK8..." required maxlength="10" style="text-transform: uppercase;">
                 
                 <button type="submit" id="submitBtn">Get My Ticket</button>
                 
@@ -70,7 +75,7 @@
                         <div style="font-size: 0.7em; color: #999;">ID: <span id="displayId">---</span></div>
                     </div>
                 </div>
-                <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--teal);">💾 Save to Gallery</button>
+                <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--teal); margin-top: 15px;">💾 Save to Gallery</button>
             </div>
         </div>
 
@@ -110,6 +115,10 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwZHRiaWVkdGtqbXNpYXJwY2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MDA1NTMsImV4cCI6MjA4Mjk3NjU1M30.bbOsMvs-TJYd7Lh4f7xlwEqz6UwMJK4ktTGVD4hO764";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const ADMIN_PASSWORD = "1234";
+    
+    // --- FOMO & NOTIFICATION SETTINGS ---
+    const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1456950229474611287/PL6HeoTOZRJOMzD3jLm2LfshoNyNZZFlqkvYbqB_WWcvh3ABaGKJ2nEG8AUsOWRg7-uW";
 
     // Persistence Setup
     function setupPersistence() {
@@ -122,6 +131,46 @@
             });
         });
         toggleGroupFields();
+        updateFomoDisplay();
+    }
+
+    async function updateFomoDisplay() {
+        const type = document.getElementById('type').value;
+        const msgEl = document.getElementById('availabilityMsg');
+        const alertEl = document.getElementById('lowStockAlert');
+        const btn = document.getElementById('submitBtn');
+
+        const { count, error } = await _supabase
+            .from('tickets')
+            .select('*', { count: 'exact', head: true })
+            .eq('ticket_type', type);
+
+        if (error) return;
+
+        const remaining = CAPACITY[type] - count;
+        
+        if (remaining <= 0) {
+            msgEl.innerText = "❌ SOLD OUT";
+            btn.disabled = true;
+            btn.innerText = "Sold Out";
+        } else {
+            msgEl.innerText = `${remaining} tickets left`;
+            btn.disabled = false;
+            btn.innerText = "Get My Ticket";
+            if (remaining <= 5) alertEl.classList.remove('hidden');
+            else alertEl.classList.add('hidden');
+        }
+    }
+
+    async function notifyDiscord(name, type, code) {
+        if (!WEBHOOK_URL || WEBHOOK_URL.includes("YOUR_DISCORD")) return;
+        await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `🎬 **New Ticket Request!**\n**Guest:** ${name}\n**Type:** ${type}\n**M-Pesa:** ${code}`
+            })
+        });
     }
 
     function toggleGroupFields() {
@@ -149,6 +198,15 @@
     // --- CUSTOMER ACTIONS ---
     document.getElementById('ticketForm').onsubmit = async (e) => {
         e.preventDefault();
+        
+        const mpesaCode = document.getElementById('code').value.toUpperCase().trim();
+        const mpesaRegex = /^[A-Z0-9]{10}$/;
+        
+        if (!mpesaRegex.test(mpesaCode)) {
+            alert("❌ Invalid M-Pesa Code. Must be exactly 10 characters.");
+            return;
+        }
+
         const btn = document.getElementById('submitBtn');
         btn.innerText = "Processing...";
         btn.disabled = true;
@@ -161,15 +219,17 @@
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
             ticket_type: document.getElementById('type').value,
-            mpesa_code: document.getElementById('code').value.toUpperCase(),
+            mpesa_code: mpesaCode,
             group_members: groupNames,
             status: 'pending'
         }]).select();
 
         if (error) {
-            alert("Error: Code likely already used.");
+            alert("Error: Code already used or database error.");
             btn.disabled = false;
+            btn.innerText = "Get My Ticket";
         } else {
+            notifyDiscord(data[0].name, data[0].ticket_type, mpesaCode);
             ['name', 'phone', 'type', 'code'].forEach(id => localStorage.removeItem('draft_' + id));
             document.getElementById('ticketForm').classList.add('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
@@ -228,16 +288,15 @@
         const list = document.getElementById('guestList');
         list.innerHTML = "";
         
-        // Sort Pending to top
         data.sort((a,b) => (a.status === 'pending' ? -1 : 1)).forEach(t => {
             const div = document.createElement('div');
             div.className = "admin-item";
-            if(t.status === 'pending') div.style.borderLeft = "4px solid var(--orange)";
+            if(t.status === 'pending') div.style.borderLeft = "4px solid #ff4b2b";
             div.innerHTML = `
                 <div>
                     <strong>${t.name}</strong><br><small>${t.mpesa_code} | ${t.ticket_type}</small>
                 </div>
-                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:5px 10px; background:var(--orange)">Approve</button>` : `<small>Verified</small>`}
+                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:5px 10px; background:#ff4b2b">Approve</button>` : `<small>Verified</small>`}
             `;
             list.appendChild(div);
         });
