@@ -9,26 +9,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.4/build/intasend-inline.js"></script>
     
     <link rel="stylesheet" href="./style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<a href="https://wa.me/2547XXXXXXXX?text=Hi,%20I'm%20having%20trouble%20with%20my%20film%20premiere%20ticket." class="help-float" target="_blank">
-    Need Help?
-</a>
+<a href="https://wa.me/2547XXXXXXXX" class="help-float" target="_blank">Need Help?</a>
 
 <div class="container">
     <div class="card">
         <div id="customerView">
             <header>
-                <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(55, 215, 208, 0.3);">
+                <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center;">
                     <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
                 </div>
                 <div class="brand-name">MUTCU</div>
                 <h1>Film Premiere</h1>
-                <p style="color: var(--brand-teal); font-weight: 600; letter-spacing: 1px; margin-top: -5px;">EXCLUSIVE CINEMATIC ACCESS</p>
             </header>
 
             <div class="countdown-timer" id="timer">
@@ -38,20 +36,12 @@
                 <div class="timer-unit"><span id="seconds">00</span><small>Sec</small></div>
             </div>
 
-            <div class="payment-info">
-                <strong style="color: var(--brand-orange);">Lipa na M-Pesa</strong><br>
-                Paybill: <b>123456</b> | Acc: <b>Movie</b><br>
-                <div style="font-size: 11px; opacity: 0.9; margin-top: 5px; color: var(--text-main);">
-                    Reg: 100/- | VIP: 200/- | Group: 400/-
-                </div>
-            </div>
-
             <form id="ticketForm">
                 <label>Full Name</label>
                 <input type="text" id="name" placeholder="Enter your name" required>
                 
-                <label>Phone Number</label>
-                <input type="tel" id="phone" placeholder="0712..." required>
+                <label>Phone Number (M-Pesa)</label>
+                <input type="tel" id="phone" placeholder="0712345678" required>
                 
                 <label>Ticket Category</label>
                 <select id="type" onchange="updateFomoDisplay(); toggleGroupFields();">
@@ -60,26 +50,22 @@
                     <option value="Group of 5">Group of 5 - 400/-</option>
                 </select>
 
-                <div id="fomoBox" style="text-align: center; margin-top: 15px; min-height: 20px;">
+                <div id="fomoBox" style="text-align: center; margin-top: 15px;">
                     <span id="availabilityMsg" style="font-size: 0.8rem; color: var(--text-dim);">Checking availability...</span>
-                    <span id="lowStockAlert" class="hidden" style="display: block; font-size: 0.85rem; margin-top: 5px;">🔥 SELLING FAST!</span>
                 </div>
 
-                <div id="groupFields" class="hidden" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); margin-top: 20px;">
-                    <label style="margin-top: 0;">Group Member Names</label>
-                    <input type="text" class="member-name" placeholder="Name 2" style="margin-bottom: 8px;">
-                    <input type="text" class="member-name" placeholder="Name 3" style="margin-bottom: 8px;">
-                    <input type="text" class="member-name" placeholder="Name 4" style="margin-bottom: 8px;">
-                    <input type="text" class="member-name" placeholder="Name 5">
+                <div id="groupFields" class="hidden">
+                    <label>Group Member Names</label>
+                    <input type="text" class="member-name" placeholder="Member 2" style="margin-bottom: 8px;">
+                    <input type="text" class="member-name" placeholder="Member 3" style="margin-bottom: 8px;">
+                    <input type="text" class="member-name" placeholder="Member 4" style="margin-bottom: 8px;">
+                    <input type="text" class="member-name" placeholder="Member 5">
                 </div>
-
-                <label>M-Pesa Transaction Code</label>
-                <input type="text" id="code" placeholder="e.g. SAK8..." required maxlength="10" style="text-transform: uppercase; font-weight: 700; letter-spacing: 2px;">
                 
-                <button type="submit" id="submitBtn">Get My Ticket</button>
+                <button type="submit" id="submitBtn">Pay and Get Ticket</button>
                 
                 <p style="text-align:center; font-size:12px; margin-top:25px; cursor:pointer" onclick="showRetrievePrompt()">
-                    Already paid? <span style="color:var(--brand-teal); font-weight: 700; text-decoration: underline;">Retrieve ticket</span>
+                    Already paid? <span style="color:var(--brand-teal); font-weight: 700;">Retrieve ticket</span>
                 </p>
             </form>
 
@@ -87,114 +73,143 @@
         </div>
 
         <div id="adminView" class="hidden">
-            <header>
-                <h1 style="font-size: 1.5rem;">Admin Panel</h1>
-                <div style="display:flex; gap:10px; margin-bottom:20px">
-                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center; border: 1px solid var(--glass-border);">
-                        <small style="color:var(--text-dim)">Approved</small><br><strong id="statApproved" style="font-size:1.5rem; color: var(--brand-teal);">0</strong>
-                    </div>
-                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center; border: 1px solid var(--glass-border);">
-                        <small style="color:var(--text-dim)">Checked In</small><br><strong id="statIn" style="font-size:1.5rem; color: var(--brand-orange);">0</strong>
-                    </div>
-                </div>
-            </header>
-            
-            <div id="scannerSection" class="hidden">
-                <div id="reader" style="border-radius: 20px; overflow: hidden; border: 2px solid var(--brand-teal);"></div>
-                <button onclick="stopScanner()" style="background: var(--brand-pink); margin-top:10px;">Close Scanner</button>
-            </div>
-
-            <button onclick="startScanner()" style="background: var(--brand-teal);">📷 Scan QR Code</button>
-            <button onclick="exportToCSV()" style="background: transparent; border: 2px solid var(--brand-orange); color: var(--brand-orange); margin-top:10px">📥 Export CSV</button>
-            
-            <div style="margin-top: 30px;">
-                <label style="color: var(--text-main);">Guest List</label>
-                <div id="guestList" style="max-height: 400px; overflow-y: auto;">Loading...</div>
-            </div>
-            
-            <button onclick="window.location.hash=''" style="background:#333; margin-top: 20px;">Exit Admin</button>
+             <button onclick="window.location.hash=''" style="background:#333; margin-top: 20px;">Exit Admin</button>
         </div>
     </div>
 </div>
 
 <script>
+    // --- CONFIGURATION ---
     const SUPABASE_URL = "https://jvrxmnvetjftssflgela.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const ADMIN_PASSWORD = "1234";
+    
+    const INTASEND_KEY = "ISPubKey_live_bbbcdc8c-ba28-4edf-ab6a-43dcf3811af1"; 
+    const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1456963372871319564/yYB1SR3aGxGhXY0sJhiWlS5kP8mjUY_95ajU_xan0sGBNbrHQVJUwHIH4z_u-uD2KGDf";
 
-    function startCountdown() {
-        const premiereDate = new Date("2026-02-15T18:00:00").getTime();
-        setInterval(() => {
-            const now = new Date().getTime();
-            const distance = premiereDate - now;
-            if (distance < 0) return;
-            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-            document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-            document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
-        }, 1000);
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+        startCountdown();
+        updateFomoDisplay();
+    });
+
+    // --- PAYMENT LOGIC ---
+    document.getElementById('ticketForm').onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const type = document.getElementById('type').value;
+        const amount = PRICES[type];
+
+        btn.innerText = "Initializing M-Pesa...";
+        btn.disabled = true;
+
+        const intasend = new IntaSend({
+            public_key: INTASEND_KEY,
+            live: true // Change to false for testing
+        });
+
+        intasend.paymentBtn().on("COMPLETE", async (results) => {
+            const mpesaCode = results.transaction_id;
+            
+            let groupNames = "";
+            document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
+
+            // Save to Database
+            const { data, error } = await _supabase.from('tickets').insert([{
+                name: name,
+                phone: phone,
+                ticket_type: type,
+                mpesa_code: mpesaCode,
+                group_members: groupNames,
+                status: 'approved' 
+            }]).select();
+
+            if (error) {
+                alert("Payment successful but database error. Save your M-Pesa message and contact support.");
+            } else {
+                document.getElementById('ticketForm').classList.add('hidden');
+                document.getElementById('statusArea').classList.remove('hidden');
+                renderTicket(data[0]);
+            }
+        })
+        .on("FAILED", (results) => {
+            alert("Payment failed or cancelled.");
+            btn.disabled = false;
+            btn.innerText = "Pay and Get Ticket";
+        })
+        .on("IN-PROGRESS", () => {
+            btn.innerText = "Checking PIN Status...";
+        });
+
+        intasend.buttons.show({
+            amount: amount,
+            phone_number: phone,
+            email: "guest@mutcu.com"
+        });
+    };
+
+    // --- TICKET RENDERING ---
+    function renderTicket(data) {
+        const statusArea = document.getElementById('statusArea');
+        statusArea.innerHTML = `
+            <h3 id="statusMsg" style="text-align: center; color: var(--brand-teal); font-weight: 800; margin-bottom:15px;">✅ TICKET VERIFIED!</h3>
+            <div id="printableTicket" style="background:white; padding:20px; border-radius:15px; text-align:center; color:#000;">
+                <div style="background:var(--brand-navy); color:white; padding:5px 15px; border-radius:50px; display:inline-block; font-size:12px; margin-bottom:10px;">${data.ticket_type}</div>
+                <h2 style="margin: 10px 0; font-size:1.2rem;">OFFICIAL ENTRANCE PASS</h2>
+                <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
+                <div style="border-top:1px dashed #ccc; padding-top:15px;">
+                    <div style="font-weight:900; font-size:1.1rem;">${data.name}</div>
+                    <div style="font-size:11px; color:#666; margin-top:5px;">REF: ${data.mpesa_code}</div>
+                    <div style="font-size:10px; color:var(--brand-pink); font-weight:bold; margin-top:2px;">ID: ${data.id}</div>
+                </div>
+            </div>
+            <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px;">💾 Save to Gallery</button>
+        `;
+        
+        new QRCode(document.getElementById("qrcode"), { 
+            text: `ID:${data.id}`, width: 160, height: 160, colorDark : "#04162e", colorLight : "#ffffff"
+        });
     }
 
-    function setupPersistence() {
-        const fields = ['name', 'phone', 'type', 'code'];
-        fields.forEach(id => {
-            const saved = localStorage.getItem('draft_' + id);
-            if (saved) document.getElementById(id).value = saved;
-            document.getElementById(id).addEventListener('input', (e) => localStorage.setItem('draft_' + id, e.target.value));
-        });
-        toggleGroupFields();
-        updateFomoDisplay();
+    // --- UTILITY FUNCTIONS ---
+    async function showRetrievePrompt() {
+        const code = prompt("Enter your M-Pesa Transaction Code:");
+        if (!code) return;
+        
+        const { data, error } = await _supabase.from('tickets')
+            .select('*')
+            .eq('mpesa_code', code.toUpperCase().trim())
+            .single();
+
+        if (data) {
+            document.getElementById('ticketForm').classList.add('hidden');
+            document.getElementById('statusArea').classList.remove('hidden');
+            renderTicket(data);
+        } else {
+            alert("No ticket found with that code.");
+        }
+    }
+
+    async function downloadTicket() {
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
+        const link = document.createElement('a');
+        link.download = `MUTCU_Ticket.png`;
+        link.href = canvas.toDataURL();
+        link.click();
     }
 
     async function updateFomoDisplay() {
         const type = document.getElementById('type').value;
-        const msgEl = document.getElementById('availabilityMsg');
-        const alertEl = document.getElementById('lowStockAlert');
-        const btn = document.getElementById('submitBtn');
-        const { count, error } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type).eq('status', 'approved');
+        const { count } = await _supabase.from('tickets')
+            .select('*', { count: 'exact', head: true })
+            .eq('ticket_type', type);
         
-        if (error) return;
-        const remaining = CAPACITY[type] - count;
-        if (remaining <= 0) {
-            msgEl.innerText = "❌ SOLD OUT";
-            msgEl.style.color = "var(--brand-pink)";
-            btn.disabled = true;
-            btn.innerText = "Sold Out";
-        } else {
-            msgEl.innerText = `${remaining} tickets left`;
-            msgEl.style.color = "var(--text-dim)";
-            btn.disabled = false;
-            btn.innerText = "Get My Ticket";
-            if (remaining <= 5) alertEl.classList.remove('hidden');
-            else alertEl.classList.add('hidden');
-        }
-    }
-
-    async function notifyDiscord(name, type, code) {
-        if (!WEBHOOK_URL) return;
-        const payload = {
-            embeds: [{
-                title: "🎬 Ticket Approval Required",
-                color: 0x37d7d0,
-                fields: [
-                    { name: "Guest", value: name, inline: true },
-                    { name: "Category", value: type, inline: true },
-                    { name: "M-Pesa Code", value: `**${code}**`, inline: false }
-                ],
-                footer: { text: "MUTCU Payment Verification" },
-                timestamp: new Date()
-            }]
-        };
-        try {
-            await fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (e) { console.error("Discord Error", e); }
+        const remaining = CAPACITY[type] - (count || 0);
+        document.getElementById('availabilityMsg').innerText = remaining > 0 ? `${remaining} tickets left` : "SOLD OUT";
     }
 
     function toggleGroupFields() {
@@ -202,211 +217,18 @@
         document.getElementById('groupFields').classList.toggle('hidden', !isGroup);
     }
 
-    async function route() {
-        if (window.location.hash === '#admin') {
-            if (prompt("Admin PIN:") === ADMIN_PASSWORD) {
-                document.getElementById('customerView').classList.add('hidden');
-                document.getElementById('adminView').classList.remove('hidden');
-                loadAdminData();
-            } else window.location.hash = '';
-        } else {
-            document.getElementById('customerView').classList.remove('hidden');
-            document.getElementById('adminView').classList.add('hidden');
-        }
+    function startCountdown() {
+        const premiereDate = new Date("2026-02-15T18:00:00").getTime();
+        setInterval(() => {
+            const distance = premiereDate - new Date().getTime();
+            if (distance < 0) return;
+            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        }, 1000);
     }
-
-    document.getElementById('ticketForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const mpesaCode = document.getElementById('code').value.toUpperCase().trim();
-        if (!/^[A-Z0-9]{10}$/.test(mpesaCode)) return alert("❌ Invalid M-Pesa Code.");
-        
-        const btn = document.getElementById('submitBtn');
-        btn.innerText = "Sending Request...";
-        btn.disabled = true;
-
-        let groupNames = "";
-        document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
-
-        const { data, error } = await _supabase.from('tickets').insert([{
-            name: document.getElementById('name').value,
-            phone: document.getElementById('phone').value,
-            ticket_type: document.getElementById('type').value,
-            mpesa_code: mpesaCode,
-            group_members: groupNames,
-            status: 'pending'
-        }]).select();
-
-        if (error) {
-            alert("This M-Pesa code is already in use.");
-            btn.disabled = false;
-            btn.innerText = "Get My Ticket";
-        } else {
-            notifyDiscord(data[0].name, data[0].ticket_type, mpesaCode);
-            ['name', 'phone', 'type', 'code'].forEach(id => localStorage.removeItem('draft_' + id));
-            document.getElementById('ticketForm').classList.add('hidden');
-            document.getElementById('statusArea').classList.remove('hidden');
-            startPolling(data[0].mpesa_code);
-        }
-    };
-
-    async function showRetrievePrompt() {
-        const input = prompt("Enter M-Pesa Code to retrieve ticket:");
-        if(!input) return;
-        const code = input.toUpperCase().trim();
-        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
-        if(data) {
-            document.getElementById('ticketForm').classList.add('hidden');
-            document.getElementById('statusArea').classList.remove('hidden');
-            if(data.status === 'approved') renderTicket(data);
-            else if(data.status === 'rejected') showRejectedState(code);
-            else startPolling(code);
-        } else alert("Ticket not found.");
-    }
-
-    function startPolling(code) {
-        const statusArea = document.getElementById('statusArea');
-        statusArea.innerHTML = `
-            <div class="loader-container">
-                <div class="brand-spinner"></div>
-                <h3 style="color: var(--brand-teal); text-align:center;">VERIFYING PAYMENT</h3>
-                <p style="font-size: 0.9rem; text-align:center; margin-bottom: 20px;">
-                    Code: <b style="color:var(--brand-orange)">${code}</b>
-                </p>
-                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
-                    <p style="font-size: 0.8rem; line-height: 1.4;">
-                        🎬 <b>Take a break!</b> Approval is manual and may take 2-5 minutes.
-                    </p>
-                    <p style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px;">
-                        You can close this page. Re-enter your code using "Retrieve Ticket" later.
-                    </p>
-                </div>
-            </div>
-        `;
-
-        const interval = setInterval(async () => {
-            const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
-            if (data && data.status === 'approved') {
-                clearInterval(interval);
-                statusArea.innerHTML = `<h3 id="statusMsg" class="verify-pulse" style="text-align: center; color: var(--brand-teal); margin-bottom: 20px; font-weight: 800;"></h3>
-                    <div id="printableTicket">
-                        <div id="displayType"></div>
-                        <h2 style="font-size: 1.1em; letter-spacing: 1px; margin: 15px 0; color: #04162e; font-weight: 900;">OFFICIAL ENTRANCE PASS</h2>
-                        <div id="qrcode"></div>
-                        <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                            <div id="displayName" style="font-weight: 800; font-size: 1.1rem; color: #000;"></div>
-                            <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">VERIFICATION ID: <span id="displayId" style="font-weight:bold; color: var(--brand-pink);"></span></div>
-                        </div>
-                    </div>
-                    <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px;">💾 Save to Gallery</button>`;
-                renderTicket(data);
-            } else if (data && data.status === 'rejected') {
-                clearInterval(interval);
-                showRejectedState(code);
-            }
-        }, 3000);
-    }
-
-    function showRejectedState(code) {
-        document.getElementById('statusArea').innerHTML = `
-            <div style="text-align: center; padding: 25px; background: rgba(244, 63, 94, 0.1); border: 2px solid var(--brand-pink); border-radius: 24px;">
-                <h2 style="color: var(--brand-pink); font-weight: 800;">❌ CODE REJECTED</h2>
-                <p style="font-size: 0.85rem; margin: 15px 0;">The code <b>${code}</b> could not be verified.</p>
-                <button onclick="location.reload()" style="background: var(--brand-pink); color: white;">Try Again</button>
-            </div>`;
-    }
-
-    function renderTicket(data) {
-        document.getElementById('statusMsg').innerText = "✅ TICKET VERIFIED!";
-        document.getElementById('displayName').innerText = data.name;
-        document.getElementById('displayType').innerText = data.ticket_type;
-        document.getElementById('displayId').innerText = data.id;
-        document.getElementById("qrcode").innerHTML = ""; 
-        setTimeout(() => {
-            new QRCode(document.getElementById("qrcode"), { 
-                text: `ID:${data.id}`, width: 160, height: 160, colorDark : "#04162e", colorLight : "#ffffff"
-            });
-            document.getElementById('downloadBtn').classList.remove('hidden');
-        }, 500);
-    }
-
-    async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3, useCORS: true });
-        const link = document.createElement('a');
-        link.download = `MUTCU_Ticket_${Date.now()}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    }
-
-    async function loadAdminData() {
-        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
-        if(!data) return;
-        document.getElementById('statApproved').innerText = data.filter(t => t.status === 'approved').length;
-        document.getElementById('statIn').innerText = data.filter(t => t.checked_in).length;
-        const list = document.getElementById('guestList');
-        list.innerHTML = "";
-        data.forEach(t => {
-            const div = document.createElement('div');
-            div.style = "background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:10px; border: 1px solid var(--glass-border);";
-            
-            let actionButtons = "";
-            if (t.status === 'pending') {
-                actionButtons = `
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button onclick="updateStatus(${t.id}, 'approved')" style="flex:1; padding:8px; font-size:12px; background: var(--brand-teal); margin:0;">Approve</button>
-                        <button onclick="updateStatus(${t.id}, 'rejected')" style="flex:1; padding:8px; font-size:12px; background: var(--brand-pink); margin:0;">Reject</button>
-                    </div>`;
-            } else {
-                const color = t.status === 'approved' ? 'var(--brand-teal)' : 'var(--brand-pink)';
-                actionButtons = `<div style="text-align:right; color:${color}; font-size:12px; font-weight:800; margin-top:5px;">✓ ${t.status.toUpperCase()}</div>`;
-            }
-
-            div.innerHTML = `<div><strong style="color:var(--text-main)">${t.name}</strong><br>
-                <small style="color:var(--text-dim)">${t.mpesa_code} | ${t.ticket_type}</small>
-                ${t.group_members ? `<br><small style="color:var(--brand-orange)">Members: ${t.group_members}</small>` : ''}
-                </div>${actionButtons}`;
-            list.appendChild(div);
-        });
-    }
-
-    async function updateStatus(id, newStatus) {
-        await _supabase.from('tickets').update({ status: newStatus }).eq('id', id);
-        loadAdminData();
-    }
-
-    async function exportToCSV() {
-        const { data } = await _supabase.from('tickets').select('*');
-        const csv = "Name,Phone,Type,Mpesa,Status\n" + data.map(t => `${t.name},${t.phone},${t.ticket_type},${t.mpesa_code},${t.status}`).join("\n");
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = window.URL.createObjectURL(blob); a.download = 'GuestList.csv'; a.click();
-    }
-
-    let scanner;
-    function startScanner() {
-        document.getElementById('scannerSection').classList.remove('hidden');
-        scanner = new Html5Qrcode("reader");
-        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (txt) => {
-            const id = txt.split(':')[1];
-            stopScanner();
-            const { data } = await _supabase.from('tickets').select('*').eq('id', id).single();
-            if (!data) alert("Invalid Ticket");
-            else if (data.checked_in) alert("ALREADY USED by " + data.name);
-            else {
-                await _supabase.from('tickets').update({ checked_in: true }).eq('id', id);
-                alert("WELCOME, " + data.name.toUpperCase());
-                loadAdminData();
-            }
-        });
-    }
-
-    function stopScanner() { if(scanner) scanner.stop().then(() => document.getElementById('scannerSection').classList.add('hidden')); }
-
-    window.addEventListener('hashchange', route);
-    window.addEventListener('DOMContentLoaded', () => {
-        setupPersistence();
-        startCountdown();
-        route();
-    });
 </script>
+
 </body>
 </html>
