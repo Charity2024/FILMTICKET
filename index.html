@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.4/build/intasend-inline.js"></script>
     
     <link rel="stylesheet" href="./style.css">
@@ -71,10 +70,6 @@
 
             <div id="statusArea" class="hidden"></div>
         </div>
-
-        <div id="adminView" class="hidden">
-             <button onclick="window.location.hash=''" style="background:#333; margin-top: 20px;">Exit Admin</button>
-        </div>
     </div>
 </div>
 
@@ -87,6 +82,12 @@
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
+
+    // Initialize IntaSend outside the function
+    const intasend = new IntaSend({
+        public_key: INTASEND_KEY,
+        live: false 
+    });
 
     window.addEventListener('DOMContentLoaded', () => {
         startCountdown();
@@ -108,17 +109,12 @@
             formattedPhone = "254" + formattedPhone.substring(1);
         }
 
-        btn.innerText = "Connecting...";
+        btn.innerText = "Processing...";
         btn.disabled = true;
 
         try {
-            const intasend = new IntaSend({
-                public_key: INTASEND_KEY,
-                live: false 
-            });
-
-            // Switched to .checkout() for better browser compatibility
-            intasend.checkout({
+            // Use .run() instead of .checkout()
+            intasend.run({
                 amount: amount,
                 currency: "KES",
                 phone_number: formattedPhone,
@@ -153,12 +149,12 @@
                 btn.innerText = "Pay and Get Ticket";
             })
             .on("IN-PROGRESS", () => {
-                btn.innerText = "Waiting for M-Pesa...";
+                btn.innerText = "Awaiting PIN...";
             });
 
         } catch (err) {
-            console.error("Intasend setup error:", err);
-            alert("Could not start payment. Check your internet connection or ad-blocker.");
+            console.error("Intasend error:", err);
+            alert("Payment initialization failed.");
             btn.disabled = false;
             btn.innerText = "Pay and Get Ticket";
         }
