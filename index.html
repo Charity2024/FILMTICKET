@@ -84,18 +84,16 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    // CURRENT KEY: Test Key
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
 
-    // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
         startCountdown();
         updateFomoDisplay();
     });
 
-    // --- PAYMENT LOGIC ---
+    // --- UPDATED PAYMENT LOGIC ---
     document.getElementById('ticketForm').onsubmit = async (e) => {
         e.preventDefault();
         
@@ -105,62 +103,67 @@
         const type = document.getElementById('type').value;
         const amount = PRICES[type];
 
-        // Format Phone Number to 254...
         let formattedPhone = phone.replace(/\D/g, ""); 
         if (formattedPhone.startsWith("0")) {
             formattedPhone = "254" + formattedPhone.substring(1);
         }
 
-        btn.innerText = "Initializing...";
+        btn.innerText = "Connecting...";
         btn.disabled = true;
 
-        const intasend = new IntaSend({
-            public_key: INTASEND_KEY,
-            live: false // MUST be false when using ISPubKey_test_
-        });
+        try {
+            const intasend = new IntaSend({
+                public_key: INTASEND_KEY,
+                live: false 
+            });
 
-        intasend.run({
-            amount: amount,
-            phone_number: formattedPhone,
-            email: "guest@mutcu.com"
-        })
-        .on("COMPLETE", async (results) => {
-            const mpesaCode = results.transaction_id;
-            
-            let groupNames = "";
-            document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
+            // Switched to .checkout() for better browser compatibility
+            intasend.checkout({
+                amount: amount,
+                currency: "KES",
+                phone_number: formattedPhone,
+                email: "guest@mutcu.com"
+            })
+            .on("COMPLETE", async (results) => {
+                const mpesaCode = results.transaction_id || "TEST_MODE";
+                
+                let groupNames = "";
+                document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
 
-            const { data, error } = await _supabase.from('tickets').insert([{
-                name: name,
-                phone: formattedPhone,
-                ticket_type: type,
-                mpesa_code: mpesaCode,
-                group_members: groupNames,
-                status: 'approved' 
-            }]).select();
+                const { data, error } = await _supabase.from('tickets').insert([{
+                    name: name,
+                    phone: formattedPhone,
+                    ticket_type: type,
+                    mpesa_code: mpesaCode,
+                    group_members: groupNames,
+                    status: 'approved' 
+                }]).select();
 
-            if (error) {
-                console.error(error);
-                alert("Database Error: " + error.message);
+                if (error) {
+                    alert("Database Error: " + error.message);
+                } else {
+                    document.getElementById('ticketForm').classList.add('hidden');
+                    document.getElementById('statusArea').classList.remove('hidden');
+                    renderTicket(data[0]);
+                }
+            })
+            .on("FAILED", (results) => {
+                alert("Payment window closed or failed.");
                 btn.disabled = false;
-                btn.innerText = "Try Again";
-            } else {
-                document.getElementById('ticketForm').classList.add('hidden');
-                document.getElementById('statusArea').classList.remove('hidden');
-                renderTicket(data[0]);
-            }
-        })
-        .on("FAILED", (results) => {
-            alert("Payment failed or was cancelled.");
+                btn.innerText = "Pay and Get Ticket";
+            })
+            .on("IN-PROGRESS", () => {
+                btn.innerText = "Waiting for M-Pesa...";
+            });
+
+        } catch (err) {
+            console.error("Intasend setup error:", err);
+            alert("Could not start payment. Check your internet connection or ad-blocker.");
             btn.disabled = false;
             btn.innerText = "Pay and Get Ticket";
-        })
-        .on("IN-PROGRESS", () => {
-            btn.innerText = "Processing...";
-        });
+        }
     };
 
-    // --- TICKET RENDERING ---
     function renderTicket(data) {
         const statusArea = document.getElementById('statusArea');
         statusArea.innerHTML = `
@@ -183,7 +186,6 @@
         });
     }
 
-    // --- UTILITY FUNCTIONS ---
     async function showRetrievePrompt() {
         const code = prompt("Enter your M-Pesa Transaction Code:");
         if (!code) return;
@@ -211,13 +213,17 @@
     }
 
     async function updateFomoDisplay() {
-        const type = document.getElementById('type').value;
-        const { count } = await _supabase.from('tickets')
-            .select('*', { count: 'exact', head: true })
-            .eq('ticket_type', type);
-        
-        const remaining = CAPACITY[type] - (count || 0);
-        document.getElementById('availabilityMsg').innerText = remaining > 0 ? `${remaining} tickets left` : "SOLD OUT";
+        try {
+            const type = document.getElementById('type').value;
+            const { count } = await _supabase.from('tickets')
+                .select('*', { count: 'exact', head: true })
+                .eq('ticket_type', type);
+            
+            const remaining = CAPACITY[type] - (count || 0);
+            document.getElementById('availabilityMsg').innerText = remaining > 0 ? `${remaining} tickets left` : "SOLD OUT";
+        } catch (e) {
+            console.log("Fomo display error", e);
+        }
     }
 
     function toggleGroupFields() {
