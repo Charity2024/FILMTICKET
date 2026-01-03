@@ -104,24 +104,35 @@
         const type = document.getElementById('type').value;
         const amount = PRICES[type];
 
-        btn.innerText = "Initializing M-Pesa...";
+        // Format Phone Number to 254...
+        let formattedPhone = phone.replace(/\D/g, ""); 
+        if (formattedPhone.startsWith("0")) {
+            formattedPhone = "254" + formattedPhone.substring(1);
+        }
+
+        btn.innerText = "Check your phone...";
         btn.disabled = true;
 
         const intasend = new IntaSend({
             public_key: INTASEND_KEY,
-            live: true // Change to false for testing
+            live: true 
         });
 
-        intasend.paymentBtn().on("COMPLETE", async (results) => {
+        // Use .run() instead of .paymentBtn() to fix the TypeError
+        intasend.run({
+            amount: amount,
+            phone_number: formattedPhone,
+            email: "guest@mutcu.com"
+        })
+        .on("COMPLETE", async (results) => {
             const mpesaCode = results.transaction_id;
             
             let groupNames = "";
             document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
 
-            // Save to Database
             const { data, error } = await _supabase.from('tickets').insert([{
                 name: name,
-                phone: phone,
+                phone: formattedPhone,
                 ticket_type: type,
                 mpesa_code: mpesaCode,
                 group_members: groupNames,
@@ -129,7 +140,8 @@
             }]).select();
 
             if (error) {
-                alert("Payment successful but database error. Save your M-Pesa message and contact support.");
+                console.error(error);
+                alert("Payment received, but database sync failed. Keep your M-Pesa message!");
             } else {
                 document.getElementById('ticketForm').classList.add('hidden');
                 document.getElementById('statusArea').classList.remove('hidden');
@@ -137,18 +149,12 @@
             }
         })
         .on("FAILED", (results) => {
-            alert("Payment failed or cancelled.");
+            alert("Payment failed or was cancelled. Please try again.");
             btn.disabled = false;
             btn.innerText = "Pay and Get Ticket";
         })
         .on("IN-PROGRESS", () => {
-            btn.innerText = "Checking PIN Status...";
-        });
-
-        intasend.buttons.show({
-            amount: amount,
-            phone_number: phone,
-            email: "guest@mutcu.com"
+            btn.innerText = "Awaiting M-Pesa PIN...";
         });
     };
 
@@ -167,7 +173,7 @@
                     <div style="font-size:10px; color:var(--brand-pink); font-weight:bold; margin-top:2px;">ID: ${data.id}</div>
                 </div>
             </div>
-            <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px;">💾 Save to Gallery</button>
+            <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer;">💾 Save to Gallery</button>
         `;
         
         new QRCode(document.getElementById("qrcode"), { 
