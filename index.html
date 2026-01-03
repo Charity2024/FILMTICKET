@@ -22,7 +22,7 @@
                 <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(55, 215, 208, 0.3);">
                     <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
                 </div>
-                <div style="text-align: center; color: white; font-weight: 800; letter-spacing: 4px; font-size: 1.2rem; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">MUTCU</div>
+                <div class="brand-name">MUTCU</div>
                 
                 <h1>Film Premiere</h1>
                 <p style="color: var(--brand-teal); font-weight: 600; letter-spacing: 1px; margin-top: -5px;">EXCLUSIVE CINEMATIC ACCESS</p>
@@ -80,8 +80,7 @@
                 </p>
             </form>
 
-            <div id="statusArea" class="hidden">
-                </div>
+            <div id="statusArea" class="hidden"></div>
         </div>
 
         <div id="adminView" class="hidden">
@@ -152,7 +151,8 @@
         const msgEl = document.getElementById('availabilityMsg');
         const alertEl = document.getElementById('lowStockAlert');
         const btn = document.getElementById('submitBtn');
-        const { count, error } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
+        const { count, error } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type).eq('status', 'approved');
+        
         if (error) return;
         const remaining = CAPACITY[type] - count;
         if (remaining <= 0) {
@@ -170,13 +170,33 @@
         }
     }
 
+    // UPDATED DISCORD NOTIFICATION
     async function notifyDiscord(name, type, code) {
         if (!WEBHOOK_URL) return;
-        await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: `🎬 **New Ticket Request!**\n**Guest:** ${name}\n**Type:** ${type}\n**M-Pesa:** ${code}` })
-        });
+        
+        const payload = {
+            embeds: [{
+                title: "🎬 New Ticket Request",
+                color: 3659216, // Teal color
+                fields: [
+                    { name: "Guest Name", value: name, inline: true },
+                    { name: "Category", value: type, inline: true },
+                    { name: "M-Pesa Code", value: `\`${code}\``, inline: false }
+                ],
+                footer: { text: "MUTCU Payment Verification System" },
+                timestamp: new Date()
+            }]
+        };
+
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.error("Discord Error", e);
+        }
     }
 
     function toggleGroupFields() {
@@ -201,11 +221,14 @@
         e.preventDefault();
         const mpesaCode = document.getElementById('code').value.toUpperCase().trim();
         if (!/^[A-Z0-9]{10}$/.test(mpesaCode)) return alert("❌ Invalid M-Pesa Code.");
+        
         const btn = document.getElementById('submitBtn');
         btn.innerText = "Processing...";
         btn.disabled = true;
+
         let groupNames = "";
         document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
+
         const { data, error } = await _supabase.from('tickets').insert([{
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
@@ -214,8 +237,9 @@
             group_members: groupNames,
             status: 'pending'
         }]).select();
+
         if (error) {
-            alert("Error: Code used or database error.");
+            alert("This M-Pesa code has already been used.");
             btn.disabled = false;
             btn.innerText = "Get My Ticket";
         } else {
@@ -247,6 +271,7 @@
                 <div class="brand-spinner"></div>
                 <h3 style="color: var(--brand-teal); letter-spacing: 1px; text-align:center;">VERIFYING PAYMENT</h3>
                 <p style="font-size: 0.8rem; text-align:center;">Checking M-Pesa code: <b style="color:var(--brand-orange)">${code}</b></p>
+                <p style="font-size: 0.7rem; color: var(--text-dim); text-align:center; margin-top:10px;">Notifications sent to Admin for approval.</p>
             </div>
         `;
 
