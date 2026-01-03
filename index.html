@@ -19,14 +19,22 @@
     <div class="card">
         <div id="customerView">
             <header>
+                <img src="logo.png" alt="Logo" style="width: 70px; height: 70px; margin: 0 auto 15px; display: block; border-radius: 50%;">
                 <h1>Film Premiere</h1>
-                <p>Join us for an exclusive cinematic experience!</p>
+                <p>An exclusive cinematic experience</p>
             </header>
+
+            <div class="countdown-timer" id="timer">
+                <div class="timer-unit"><span id="days">00</span><small>Days</small></div>
+                <div class="timer-unit"><span id="hours">00</span><small>Hrs</small></div>
+                <div class="timer-unit"><span id="minutes">00</span><small>Min</small></div>
+                <div class="timer-unit"><span id="seconds">00</span><small>Sec</small></div>
+            </div>
 
             <div class="payment-info">
                 <strong>Lipa na M-Pesa</strong><br>
                 Paybill: <b>123456</b> | Acc: <b>Movie</b><br>
-                <span>100/- (Reg) | 200/- (VIP) | 400/- (Group)</span>
+                <span style="font-size: 11px; opacity: 0.8;">100/- Reg | 200/- VIP | 400/- Group of 5</span>
             </div>
 
             <form id="ticketForm">
@@ -43,17 +51,17 @@
                     <option value="Group of 5">Group of 5 — 400/-</option>
                 </select>
 
-                <div id="fomoBox" style="margin-top: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between;">
-                    <span id="availabilityMsg" style="color: #4fd1c5;">Checking availability...</span>
-                    <span id="lowStockAlert" class="hidden" style="color: #ff4b2b; animation: pulse 1.5s infinite;">🔥 Selling Fast!</span>
+                <div id="fomoBox">
+                    <span id="availabilityMsg">Checking availability...</span>
+                    <span id="lowStockAlert" class="hidden">🔥 Selling Fast!</span>
                 </div>
 
                 <div id="groupFields" class="hidden">
                     <label>Other Member Names</label>
                     <input type="text" class="member-name" placeholder="Name 2">
-                    <input type="text" class="member-name" placeholder="Name 3" style="margin-top:5px">
-                    <input type="text" class="member-name" placeholder="Name 4" style="margin-top:5px">
-                    <input type="text" class="member-name" placeholder="Name 5" style="margin-top:5px">
+                    <input type="text" class="member-name" placeholder="Name 3" style="margin-top:8px">
+                    <input type="text" class="member-name" placeholder="Name 4" style="margin-top:8px">
+                    <input type="text" class="member-name" placeholder="Name 5" style="margin-top:8px">
                 </div>
 
                 <label>M-Pesa Transaction Code</label>
@@ -61,21 +69,21 @@
                 
                 <button type="submit" id="submitBtn">Get My Ticket</button>
                 
-                <p style="text-align:center; font-size:12px; color:#666; margin-top:15px; cursor:pointer" onclick="showRetrievePrompt()">Already paid? Retrieve ticket</p>
+                <p style="text-align:center; font-size:12px; color:var(--text-dim); margin-top:20px; cursor:pointer" onclick="showRetrievePrompt()">Already paid? <span style="color:var(--accent)">Retrieve ticket</span></p>
             </form>
 
             <div id="statusArea" class="hidden">
-                <h3 id="statusMsg" style="text-align: center;">Processing...</h3>
+                <h3 id="statusMsg" style="text-align: center; color: var(--accent); margin-bottom: 20px;">Processing...</h3>
                 <div id="printableTicket">
-                    <div id="displayType" style="font-weight:bold; color:var(--pink)">Category</div>
-                    <h2 style="font-size: 1.1em;">OFFICIAL ENTRANCE PASS</h2>
+                    <div id="displayType">Category</div>
+                    <h2 style="font-size: 1.2em; letter-spacing: 1px; margin: 10px 0;">OFFICIAL ENTRANCE PASS</h2>
                     <div id="qrcode"></div>
-                    <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-                        <div id="displayName" style="font-weight: 700;">Guest Name</div>
-                        <div style="font-size: 0.7em; color: #999;">ID: <span id="displayId">---</span></div>
+                    <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                        <div id="displayName" style="font-weight: 800; font-size: 1.1rem;">Guest Name</div>
+                        <div style="font-size: 0.75rem; color: #777; margin-top: 5px;">VERIFICATION ID: <span id="displayId" style="font-weight:bold; color:#000;">---</span></div>
                     </div>
                 </div>
-                <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--teal); margin-top: 15px;">💾 Save to Gallery</button>
+                <button id="downloadBtn" class="hidden" onclick="downloadTicket()">💾 Save to Gallery</button>
             </div>
         </div>
 
@@ -83,29 +91,29 @@
             <header>
                 <h1>Admin Panel</h1>
                 <div style="display:flex; gap:10px; margin-bottom:20px">
-                    <div style="flex:1; background:#eee; padding:10px; border-radius:10px; text-align:center">
-                        <small>Approved</small><br><strong id="statApproved">0</strong>
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center">
+                        <small style="color:var(--text-dim)">Approved</small><br><strong id="statApproved" style="font-size:1.5rem">0</strong>
                     </div>
-                    <div style="flex:1; background:#eee; padding:10px; border-radius:10px; text-align:center">
-                        <small>In</small><br><strong id="statIn">0</strong>
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center">
+                        <small style="color:var(--text-dim)">Checked In</small><br><strong id="statIn" style="font-size:1.5rem">0</strong>
                     </div>
                 </div>
             </header>
             
             <div id="scannerSection" class="hidden">
-                <div id="reader"></div>
-                <button onclick="stopScanner()" style="background:#e74c3c;">Close Scanner</button>
+                <div id="reader" style="border-radius: 20px; overflow: hidden;"></div>
+                <button onclick="stopScanner()" style="background:#e74c3c; margin-top:10px;">Close Scanner</button>
             </div>
 
-            <button onclick="startScanner()" style="background: var(--navy);">📷 Scan QR Code</button>
-            <button onclick="exportToCSV()" style="background: var(--teal); margin-top:10px">📥 Export CSV</button>
+            <button onclick="startScanner()">📷 Scan QR Code</button>
+            <button onclick="exportToCSV()" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top:10px">📥 Export CSV</button>
             
-            <div style="margin-top: 20px;">
-                <label>Guest List (Pending first)</label>
+            <div style="margin-top: 30px;">
+                <label>Guest List</label>
                 <div id="guestList">Loading...</div>
             </div>
             
-            <button onclick="window.location.hash=''" style="background:#999">Exit Admin</button>
+            <button onclick="window.location.hash=''" style="background:#333; margin-top: 20px;">Exit Admin</button>
         </div>
     </div>
 </div>
@@ -115,20 +123,31 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const ADMIN_PASSWORD = "1234";
-    
-    // --- FOMO & NOTIFICATION SETTINGS ---
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1456950229474611287/PL6HeoTOZRJOMzD3jLm2LfshoNyNZZFlqkvYbqB_WWcvh3ABaGKJ2nEG8AUsOWRg7-uW";
 
-    // Persistence Setup
+    // --- COUNTDOWN TIMER LOGIC ---
+    function startCountdown() {
+        const premiereDate = new Date("2026-02-15T18:00:00").getTime(); // <--- SET YOUR PREMIERE DATE HERE
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = premiereDate - now;
+
+            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        }, 1000);
+    }
+
+    // --- REMAINING JAVASCRIPT (Same logic as yours, optimized for visuals) ---
     function setupPersistence() {
         const fields = ['name', 'phone', 'type', 'code'];
         fields.forEach(id => {
             const saved = localStorage.getItem('draft_' + id);
             if (saved) document.getElementById(id).value = saved;
-            document.getElementById(id).addEventListener('input', (e) => {
-                localStorage.setItem('draft_' + id, e.target.value);
-            });
+            document.getElementById(id).addEventListener('input', (e) => localStorage.setItem('draft_' + id, e.target.value));
         });
         toggleGroupFields();
         updateFomoDisplay();
@@ -140,15 +159,10 @@
         const alertEl = document.getElementById('lowStockAlert');
         const btn = document.getElementById('submitBtn');
 
-        const { count, error } = await _supabase
-            .from('tickets')
-            .select('*', { count: 'exact', head: true })
-            .eq('ticket_type', type);
-
+        const { count, error } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
         if (error) return;
 
         const remaining = CAPACITY[type] - count;
-        
         if (remaining <= 0) {
             msgEl.innerText = "❌ SOLD OUT";
             btn.disabled = true;
@@ -163,13 +177,11 @@
     }
 
     async function notifyDiscord(name, type, code) {
-        if (!WEBHOOK_URL || WEBHOOK_URL.includes("YOUR_DISCORD")) return;
+        if (!WEBHOOK_URL) return;
         await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                content: `🎬 **New Ticket Request!**\n**Guest:** ${name}\n**Type:** ${type}\n**M-Pesa:** ${code}`
-            })
+            body: JSON.stringify({ content: `🎬 **New Ticket Request!**\n**Guest:** ${name}\n**Type:** ${type}\n**M-Pesa:** ${code}` })
         });
     }
 
@@ -179,41 +191,29 @@
     }
 
     async function route() {
-        const isAdmin = window.location.hash === '#admin';
-        if (isAdmin) {
-            const pw = prompt("Admin PIN:");
-            if (pw === ADMIN_PASSWORD) {
+        if (window.location.hash === '#admin') {
+            if (prompt("Admin PIN:") === ADMIN_PASSWORD) {
                 document.getElementById('customerView').classList.add('hidden');
                 document.getElementById('adminView').classList.remove('hidden');
                 loadAdminData();
-            } else {
-                window.location.hash = '';
-            }
+            } else window.location.hash = '';
         } else {
             document.getElementById('customerView').classList.remove('hidden');
             document.getElementById('adminView').classList.add('hidden');
         }
     }
 
-    // --- CUSTOMER ACTIONS ---
     document.getElementById('ticketForm').onsubmit = async (e) => {
         e.preventDefault();
-        
         const mpesaCode = document.getElementById('code').value.toUpperCase().trim();
-        const mpesaRegex = /^[A-Z0-9]{10}$/;
-        
-        if (!mpesaRegex.test(mpesaCode)) {
-            alert("❌ Invalid M-Pesa Code. Must be exactly 10 characters.");
-            return;
-        }
+        if (!/^[A-Z0-9]{10}$/.test(mpesaCode)) return alert("❌ Invalid M-Pesa Code.");
 
         const btn = document.getElementById('submitBtn');
         btn.innerText = "Processing...";
         btn.disabled = true;
 
-        const memberInputs = document.querySelectorAll('.member-name');
         let groupNames = "";
-        memberInputs.forEach(i => { if(i.value) groupNames += i.value + ", "; });
+        document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
 
         const { data, error } = await _supabase.from('tickets').insert([{
             name: document.getElementById('name').value,
@@ -225,7 +225,7 @@
         }]).select();
 
         if (error) {
-            alert("Error: Code already used or database error.");
+            alert("Error: Code used or database busy.");
             btn.disabled = false;
             btn.innerText = "Get My Ticket";
         } else {
@@ -239,7 +239,6 @@
 
     async function showRetrievePrompt() {
         const code = prompt("Enter M-Pesa Code:").toUpperCase();
-        if(!code) return;
         const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
         if(data) {
             document.getElementById('ticketForm').classList.add('hidden');
@@ -260,44 +259,35 @@
     }
 
     function renderTicket(data) {
-        document.getElementById('statusMsg').innerHTML = "✅ Verified!";
+        document.getElementById('statusMsg').innerText = "✅ Ticket Verified!";
         document.getElementById('displayName').innerText = data.name;
         document.getElementById('displayType').innerText = data.ticket_type;
         document.getElementById('displayId').innerText = data.id;
         document.getElementById("qrcode").innerHTML = ""; 
-        new QRCode(document.getElementById("qrcode"), { text: `ID:${data.id}`, width: 150, height: 150 });
+        new QRCode(document.getElementById("qrcode"), { text: `ID:${data.id}`, width: 160, height: 160 });
         document.getElementById('downloadBtn').classList.remove('hidden');
     }
 
     async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 2 });
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3, useCORS: true });
         const link = document.createElement('a');
-        link.download = 'My_Ticket.png';
-        link.href = canvas.toDataURL();
+        link.download = 'Film_Premiere_Ticket.png';
+        link.href = canvas.toDataURL("image/png");
         link.click();
     }
 
-    // --- ADMIN ACTIONS ---
     async function loadAdminData() {
         const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
         if(!data) return;
-
         document.getElementById('statApproved').innerText = data.filter(t => t.status === 'approved').length;
         document.getElementById('statIn').innerText = data.filter(t => t.checked_in).length;
-
         const list = document.getElementById('guestList');
         list.innerHTML = "";
-        
         data.sort((a,b) => (a.status === 'pending' ? -1 : 1)).forEach(t => {
             const div = document.createElement('div');
-            div.className = "admin-item";
-            if(t.status === 'pending') div.style.borderLeft = "4px solid #ff4b2b";
-            div.innerHTML = `
-                <div>
-                    <strong>${t.name}</strong><br><small>${t.mpesa_code} | ${t.ticket_type}</small>
-                </div>
-                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:5px 10px; background:#ff4b2b">Approve</button>` : `<small>Verified</small>`}
-            `;
+            div.style = "background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
+            div.innerHTML = `<div><strong>${t.name}</strong><br><small style="color:var(--text-dim)">${t.mpesa_code}</small></div>
+                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:8px 15px; margin:0; font-size:12px;">Approve</button>` : `<span style="color:var(--accent); font-size:12px;">✓ Approved</span>`}`;
             list.appendChild(div);
         });
     }
@@ -313,9 +303,7 @@
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = 'GuestList.csv';
-        a.click();
+        a.href = url; a.download = 'GuestList.csv'; a.click();
     }
 
     let scanner;
@@ -326,11 +314,11 @@
             const id = txt.split(':')[1];
             stopScanner();
             const { data } = await _supabase.from('tickets').select('*').eq('id', id).single();
-            if (!data) alert("Invalid");
-            else if (data.checked_in) alert("Used by " + data.name);
+            if (!data) alert("Invalid Ticket");
+            else if (data.checked_in) alert("ALREADY USED by " + data.name);
             else {
                 await _supabase.from('tickets').update({ checked_in: true }).eq('id', id);
-                alert("Welcome " + data.name);
+                alert("WELCOME, " + data.name.toUpperCase());
                 loadAdminData();
             }
         });
@@ -341,6 +329,7 @@
     window.addEventListener('hashchange', route);
     window.addEventListener('DOMContentLoaded', () => {
         setupPersistence();
+        startCountdown();
         route();
     });
 </script>
