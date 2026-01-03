@@ -19,9 +19,13 @@
     <div class="card">
         <div id="customerView">
             <header>
-                <img src="logo.png" alt="Logo" style="width: 70px; height: 70px; margin: 0 auto 15px; display: block; border-radius: 50%;">
+                <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(55, 215, 208, 0.3);">
+                    <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
+                </div>
+                <div style="text-align: center; color: white; font-weight: 800; letter-spacing: 4px; font-size: 1.2rem; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">MUTCU</div>
+                
                 <h1>Film Premiere</h1>
-                <p>An exclusive cinematic experience</p>
+                <p style="color: var(--brand-teal); font-weight: 600; letter-spacing: 1px; margin-top: -5px;">EXCLUSIVE CINEMATIC ACCESS</p>
             </header>
 
             <div class="countdown-timer" id="timer">
@@ -32,9 +36,11 @@
             </div>
 
             <div class="payment-info">
-                <strong>Lipa na M-Pesa</strong><br>
+                <strong style="color: var(--brand-orange);">Lipa na M-Pesa</strong><br>
                 Paybill: <b>123456</b> | Acc: <b>Movie</b><br>
-                <span style="font-size: 11px; opacity: 0.8;">100/- Reg | 200/- VIP | 400/- Group of 5</span>
+                <div style="font-size: 11px; opacity: 0.9; margin-top: 5px; color: var(--text-main);">
+                    Reg: 100/- | VIP: 200/- | Group: 400/-
+                </div>
             </div>
 
             <form id="ticketForm">
@@ -51,66 +57,57 @@
                     <option value="Group of 5">Group of 5 — 400/-</option>
                 </select>
 
-                <div id="fomoBox">
-                    <span id="availabilityMsg">Checking availability...</span>
-                    <span id="lowStockAlert" class="hidden">🔥 Selling Fast!</span>
+                <div id="fomoBox" style="text-align: center; margin-top: 15px; min-height: 20px;">
+                    <span id="availabilityMsg" style="font-size: 0.8rem; color: var(--text-dim);">Checking availability...</span>
+                    <span id="lowStockAlert" class="hidden" style="display: block; font-size: 0.85rem; margin-top: 5px;">🔥 SELLING FAST!</span>
                 </div>
 
-                <div id="groupFields" class="hidden">
-                    <label>Other Member Names</label>
-                    <input type="text" class="member-name" placeholder="Name 2">
-                    <input type="text" class="member-name" placeholder="Name 3" style="margin-top:8px">
-                    <input type="text" class="member-name" placeholder="Name 4" style="margin-top:8px">
-                    <input type="text" class="member-name" placeholder="Name 5" style="margin-top:8px">
+                <div id="groupFields" class="hidden" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); margin-top: 20px;">
+                    <label style="margin-top: 0;">Group Member Names</label>
+                    <input type="text" class="member-name" placeholder="Name 2" style="margin-bottom: 8px;">
+                    <input type="text" class="member-name" placeholder="Name 3" style="margin-bottom: 8px;">
+                    <input type="text" class="member-name" placeholder="Name 4" style="margin-bottom: 8px;">
+                    <input type="text" class="member-name" placeholder="Name 5">
                 </div>
 
                 <label>M-Pesa Transaction Code</label>
-                <input type="text" id="code" placeholder="e.g. SAK8..." required maxlength="10" style="text-transform: uppercase;">
+                <input type="text" id="code" placeholder="e.g. SAK8..." required maxlength="10" style="text-transform: uppercase; font-weight: 700; letter-spacing: 2px;">
                 
                 <button type="submit" id="submitBtn">Get My Ticket</button>
                 
-                <p style="text-align:center; font-size:12px; color:var(--text-dim); margin-top:20px; cursor:pointer" onclick="showRetrievePrompt()">Already paid? <span style="color:var(--accent)">Retrieve ticket</span></p>
+                <p style="text-align:center; font-size:12px; margin-top:25px; cursor:pointer" onclick="showRetrievePrompt()">
+                    Already paid? <span style="color:var(--brand-teal); font-weight: 700; text-decoration: underline;">Retrieve ticket</span>
+                </p>
             </form>
 
             <div id="statusArea" class="hidden">
-                <h3 id="statusMsg" style="text-align: center; color: var(--accent); margin-bottom: 20px;">Processing...</h3>
-                <div id="printableTicket">
-                    <div id="displayType">Category</div>
-                    <h2 style="font-size: 1.2em; letter-spacing: 1px; margin: 10px 0;">OFFICIAL ENTRANCE PASS</h2>
-                    <div id="qrcode"></div>
-                    <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                        <div id="displayName" style="font-weight: 800; font-size: 1.1rem;">Guest Name</div>
-                        <div style="font-size: 0.75rem; color: #777; margin-top: 5px;">VERIFICATION ID: <span id="displayId" style="font-weight:bold; color:#000;">---</span></div>
-                    </div>
                 </div>
-                <button id="downloadBtn" class="hidden" onclick="downloadTicket()">💾 Save to Gallery</button>
-            </div>
         </div>
 
         <div id="adminView" class="hidden">
             <header>
-                <h1>Admin Panel</h1>
+                <h1 style="font-size: 1.5rem;">Admin Panel</h1>
                 <div style="display:flex; gap:10px; margin-bottom:20px">
-                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center">
-                        <small style="color:var(--text-dim)">Approved</small><br><strong id="statApproved" style="font-size:1.5rem">0</strong>
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center; border: 1px solid var(--glass-border);">
+                        <small style="color:var(--text-dim)">Approved</small><br><strong id="statApproved" style="font-size:1.5rem; color: var(--brand-teal);">0</strong>
                     </div>
-                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center">
-                        <small style="color:var(--text-dim)">Checked In</small><br><strong id="statIn" style="font-size:1.5rem">0</strong>
+                    <div style="flex:1; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; text-align:center; border: 1px solid var(--glass-border);">
+                        <small style="color:var(--text-dim)">Checked In</small><br><strong id="statIn" style="font-size:1.5rem; color: var(--brand-orange);">0</strong>
                     </div>
                 </div>
             </header>
             
             <div id="scannerSection" class="hidden">
-                <div id="reader" style="border-radius: 20px; overflow: hidden;"></div>
-                <button onclick="stopScanner()" style="background:#e74c3c; margin-top:10px;">Close Scanner</button>
+                <div id="reader" style="border-radius: 20px; overflow: hidden; border: 2px solid var(--brand-teal);"></div>
+                <button onclick="stopScanner()" style="background: var(--brand-pink); margin-top:10px;">Close Scanner</button>
             </div>
 
-            <button onclick="startScanner()">📷 Scan QR Code</button>
-            <button onclick="exportToCSV()" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top:10px">📥 Export CSV</button>
+            <button onclick="startScanner()" style="background: var(--brand-teal);">📷 Scan QR Code</button>
+            <button onclick="exportToCSV()" style="background: transparent; border: 2px solid var(--brand-orange); color: var(--brand-orange); margin-top:10px">📥 Export CSV</button>
             
             <div style="margin-top: 30px;">
-                <label>Guest List</label>
-                <div id="guestList">Loading...</div>
+                <label style="color: var(--text-main);">Guest List</label>
+                <div id="guestList" style="max-height: 300px; overflow-y: auto;">Loading...</div>
             </div>
             
             <button onclick="window.location.hash=''" style="background:#333; margin-top: 20px;">Exit Admin</button>
@@ -126,14 +123,12 @@
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1456950229474611287/PL6HeoTOZRJOMzD3jLm2LfshoNyNZZFlqkvYbqB_WWcvh3ABaGKJ2nEG8AUsOWRg7-uW";
 
-    // --- COUNTDOWN TIMER LOGIC ---
     function startCountdown() {
-        const premiereDate = new Date("2026-02-15T18:00:00").getTime(); // <--- SET YOUR PREMIERE DATE HERE
-
+        const premiereDate = new Date("2026-02-15T18:00:00").getTime();
         setInterval(() => {
             const now = new Date().getTime();
             const distance = premiereDate - now;
-
+            if (distance < 0) return;
             document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
             document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
             document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
@@ -141,7 +136,6 @@
         }, 1000);
     }
 
-    // --- REMAINING JAVASCRIPT (Same logic as yours, optimized for visuals) ---
     function setupPersistence() {
         const fields = ['name', 'phone', 'type', 'code'];
         fields.forEach(id => {
@@ -158,17 +152,17 @@
         const msgEl = document.getElementById('availabilityMsg');
         const alertEl = document.getElementById('lowStockAlert');
         const btn = document.getElementById('submitBtn');
-
         const { count, error } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
         if (error) return;
-
         const remaining = CAPACITY[type] - count;
         if (remaining <= 0) {
             msgEl.innerText = "❌ SOLD OUT";
+            msgEl.style.color = "var(--brand-pink)";
             btn.disabled = true;
             btn.innerText = "Sold Out";
         } else {
             msgEl.innerText = `${remaining} tickets left`;
+            msgEl.style.color = "var(--text-dim)";
             btn.disabled = false;
             btn.innerText = "Get My Ticket";
             if (remaining <= 5) alertEl.classList.remove('hidden');
@@ -207,14 +201,11 @@
         e.preventDefault();
         const mpesaCode = document.getElementById('code').value.toUpperCase().trim();
         if (!/^[A-Z0-9]{10}$/.test(mpesaCode)) return alert("❌ Invalid M-Pesa Code.");
-
         const btn = document.getElementById('submitBtn');
         btn.innerText = "Processing...";
         btn.disabled = true;
-
         let groupNames = "";
         document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
-
         const { data, error } = await _supabase.from('tickets').insert([{
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
@@ -223,9 +214,8 @@
             group_members: groupNames,
             status: 'pending'
         }]).select();
-
         if (error) {
-            alert("Error: Code used or database busy.");
+            alert("Error: Code used or database error.");
             btn.disabled = false;
             btn.innerText = "Get My Ticket";
         } else {
@@ -238,40 +228,73 @@
     };
 
     async function showRetrievePrompt() {
-        const code = prompt("Enter M-Pesa Code:").toUpperCase();
+        const input = prompt("Enter M-Pesa Code:");
+        if(!input) return;
+        const code = input.toUpperCase().trim();
         const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
         if(data) {
             document.getElementById('ticketForm').classList.add('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             if(data.status === 'approved') renderTicket(data);
             else startPolling(code);
-        } else alert("Not found.");
+        } else alert("Ticket not found.");
     }
 
     function startPolling(code) {
+        const statusArea = document.getElementById('statusArea');
+        statusArea.innerHTML = `
+            <div class="loader-container">
+                <div class="brand-spinner"></div>
+                <h3 style="color: var(--brand-teal); letter-spacing: 1px; text-align:center;">VERIFYING PAYMENT</h3>
+                <p style="font-size: 0.8rem; text-align:center;">Checking M-Pesa code: <b style="color:var(--brand-orange)">${code}</b></p>
+            </div>
+        `;
+
         const interval = setInterval(async () => {
             const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
             if (data && data.status === 'approved') {
                 clearInterval(interval);
+                statusArea.innerHTML = `
+                    <h3 id="statusMsg" class="verify-pulse" style="text-align: center; color: var(--brand-teal); margin-bottom: 20px; font-weight: 800;"></h3>
+                    <div id="printableTicket">
+                        <div id="displayType">Category</div>
+                        <h2 style="font-size: 1.1em; letter-spacing: 1px; margin: 15px 0; color: var(--brand-navy); font-weight: 900;">OFFICIAL ENTRANCE PASS</h2>
+                        <div id="qrcode"></div>
+                        <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                            <div id="displayName" style="font-weight: 800; font-size: 1.1rem; color: #000;">Guest Name</div>
+                            <div style="font-size: 0.7rem; color: #666; margin-top: 5px; text-transform: uppercase;">VERIFICATION ID: <span id="displayId" style="font-weight:bold; color: var(--brand-pink);">---</span></div>
+                        </div>
+                    </div>
+                    <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px;">💾 Save to Gallery</button>
+                `;
                 renderTicket(data);
             }
         }, 3000);
     }
 
     function renderTicket(data) {
-        document.getElementById('statusMsg').innerText = "✅ Ticket Verified!";
+        document.getElementById('statusMsg').innerText = "✅ TICKET VERIFIED!";
         document.getElementById('displayName').innerText = data.name;
         document.getElementById('displayType').innerText = data.ticket_type;
         document.getElementById('displayId').innerText = data.id;
         document.getElementById("qrcode").innerHTML = ""; 
-        new QRCode(document.getElementById("qrcode"), { text: `ID:${data.id}`, width: 160, height: 160 });
-        document.getElementById('downloadBtn').classList.remove('hidden');
+        
+        setTimeout(() => {
+            new QRCode(document.getElementById("qrcode"), { 
+                text: `ID:${data.id}`, 
+                width: 160, 
+                height: 160,
+                colorDark : "#04162e",
+                colorLight : "#ffffff"
+            });
+            document.getElementById('downloadBtn').classList.remove('hidden');
+        }, 500);
     }
 
     async function downloadTicket() {
         const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3, useCORS: true });
         const link = document.createElement('a');
-        link.download = 'Film_Premiere_Ticket.png';
+        link.download = `MUTCU_Ticket_${Date.now()}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
     }
@@ -285,9 +308,9 @@
         list.innerHTML = "";
         data.sort((a,b) => (a.status === 'pending' ? -1 : 1)).forEach(t => {
             const div = document.createElement('div');
-            div.style = "background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
-            div.innerHTML = `<div><strong>${t.name}</strong><br><small style="color:var(--text-dim)">${t.mpesa_code}</small></div>
-                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:8px 15px; margin:0; font-size:12px;">Approve</button>` : `<span style="color:var(--accent); font-size:12px;">✓ Approved</span>`}`;
+            div.style = "background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border: 1px solid var(--glass-border);";
+            div.innerHTML = `<div><strong style="color:var(--text-main)">${t.name}</strong><br><small style="color:var(--text-dim)">${t.mpesa_code} | ${t.ticket_type}</small></div>
+                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:8px 15px; margin:0; font-size:12px; background: var(--brand-teal);">Approve</button>` : `<span style="color:var(--brand-teal); font-size:12px; font-weight:800;">✓ APPROVED</span>`}`;
             list.appendChild(div);
         });
     }
