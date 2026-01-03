@@ -1,0 +1,182 @@
+/* Luma-Inspired Professional Theme */
+/* Premium Luma-Style Mesh Gradient */
+:root {
+    --navy: #0d1b3e;
+    --teal: #4fd1c5;
+    --orange: #f6ad55;
+    --pink: #ed64a6;
+    --bg-light: #f7fafc;
+}
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: var(--bg-light);
+    /* Animated Mesh Background */
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 209, 197, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(246, 173, 85, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(237, 100, 166, 0.15) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(13, 27, 62, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+    animation: meshGradient 20s ease infinite;
+    -webkit-font-smoothing: antialiased;
+}
+
+@keyframes meshGradient {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.85); /* Translucent glass effect */
+    backdrop-filter: blur(12px); /* Blurs background behind the card */
+    -webkit-backdrop-filter: blur(12px);
+    padding: 40px;
+    border-radius: 32px;
+    box-shadow: 0 20px 60px rgba(13, 27, 62, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    width: 100%;
+    max-width: 440px;
+}
+
+header h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -1.5px;
+    background: linear-gradient(to right, var(--navy), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Rest of the styles remain the same from previous step... */
+
+header p {
+    color: var(--text-muted);
+    font-size: 16px;
+    margin-bottom: 32px;
+}
+
+/* Payment Box with Logo Colors */
+.payment-info {
+    background: linear-gradient(to right, rgba(79, 209, 197, 0.1), rgba(246, 173, 85, 0.1));
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 14px;
+    border: 1px solid rgba(79, 209, 197, 0.2);
+    margin-bottom: 32px;
+}
+
+.payment-info b {
+    color: var(--navy);
+}
+
+/* Form Styling */
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+input, select {
+    width: 100%;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    font-size: 16px;
+    background: #fcfcfc;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 4px rgba(79, 209, 197, 0.1);
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+button:hover {
+    background: #1a2a5a;
+    transform: translateY(-2px);
+}
+
+/* Ticket Design: The "Wow" Factor */
+#printableTicket {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    border: 2px solid var(--bg);
+    margin-top: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+#displayType {
+    display: inline-block;
+    background: var(--pink);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+#qrcode {
+    background: white;
+    padding: 15px;
+    border-radius: 16px;
+    border: 1px solid #f0f0f0;
+}
+
+/* Admin Dashboard Elements */
+.admin-item {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #eee;
+}
+
+.admin-item button {
+    background: var(--teal);
+    padding: 8px 16px;
+    font-size: 13px;
+    width: auto;
+}
+
+
+/* Fix for section visibility */
+.hidden { 
+    display: none !important; 
+}
+
+/* Optional: Style for the admin password prompt */
+.admin-lock-screen {
+    text-align: center;
+    padding: 20px;
+}
