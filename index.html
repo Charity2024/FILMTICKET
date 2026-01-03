@@ -84,6 +84,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
+    // CURRENT KEY: Test Key
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
     const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
@@ -110,15 +111,14 @@
             formattedPhone = "254" + formattedPhone.substring(1);
         }
 
-        btn.innerText = "Check your phone...";
+        btn.innerText = "Initializing...";
         btn.disabled = true;
 
         const intasend = new IntaSend({
             public_key: INTASEND_KEY,
-            live: true 
+            live: false // MUST be false when using ISPubKey_test_
         });
 
-        // Use .run() instead of .paymentBtn() to fix the TypeError
         intasend.run({
             amount: amount,
             phone_number: formattedPhone,
@@ -141,7 +141,9 @@
 
             if (error) {
                 console.error(error);
-                alert("Payment received, but database sync failed. Keep your M-Pesa message!");
+                alert("Database Error: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "Try Again";
             } else {
                 document.getElementById('ticketForm').classList.add('hidden');
                 document.getElementById('statusArea').classList.remove('hidden');
@@ -149,12 +151,12 @@
             }
         })
         .on("FAILED", (results) => {
-            alert("Payment failed or was cancelled. Please try again.");
+            alert("Payment failed or was cancelled.");
             btn.disabled = false;
             btn.innerText = "Pay and Get Ticket";
         })
         .on("IN-PROGRESS", () => {
-            btn.innerText = "Awaiting M-Pesa PIN...";
+            btn.innerText = "Processing...";
         });
     };
 
