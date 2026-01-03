@@ -51,7 +51,6 @@ header {
     margin-bottom: 30px;
 }
 
-/* MUTCU TYPOGRAPHY */
 .brand-name {
     text-align: center; 
     color: white; 
@@ -62,7 +61,6 @@ header {
     text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
-/* BRAND GRADIENT HEADING */
 h1 {
     font-size: 2.1rem;
     font-weight: 900;
@@ -88,19 +86,53 @@ h1 {
 }
 
 .timer-unit { text-align: center; min-width: 50px; }
-
 .timer-unit span {
     display: block;
     font-size: 1.3rem;
     font-weight: 800;
     color: var(--brand-teal);
 }
-
 .timer-unit small {
     font-size: 0.6rem;
     text-transform: uppercase;
     color: var(--text-dim);
     letter-spacing: 0.5px;
+}
+
+/* FLOATING HELP BUTTON */
+.help-float {
+    position: fixed;
+    bottom: 25px;
+    right: 20px;
+    background: #25d366;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.help-float::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0.4);
+    animation: pulse-white 2s infinite;
+}
+
+@keyframes pulse-white {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
 }
 
 /* PAYMENT INFO BOX */
@@ -140,10 +172,8 @@ input:focus {
     outline: none;
     border-color: var(--brand-teal);
     background: rgba(255,255,255,0.08);
-    box-shadow: 0 0 20px rgba(55, 215, 208, 0.15);
 }
 
-/* INTERACTIVE SHIMMER BUTTON */
 button {
     width: 100%;
     padding: 18px;
@@ -155,24 +185,35 @@ button {
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-top: 30px;
+    margin-top: 20px;
     cursor: pointer;
     box-shadow: 0 10px 25px rgba(55, 215, 208, 0.2);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    overflow: hidden;
 }
 
 button:active { transform: scale(0.96); }
 
-/* PHYSICAL TICKET STYLE */
+/* TICKET STYLE */
 #printableTicket {
     background: #ffffff;
     color: #020617;
     border-radius: 24px;
-    padding: 25px;
+    padding: 30px 25px;
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+#displayType {
+    background: var(--brand-navy);
+    color: white;
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 #qrcode {
@@ -181,29 +222,7 @@ button:active { transform: scale(0.96); }
     margin: 20px 0;
 }
 
-#qrcode img {
-    padding: 10px;
-    background: white;
-    border: 1px solid #f1f5f9;
-}
-
-/* TICKET PERFORATION LINE */
-#printableTicket::after {
-    content: '';
-    position: absolute;
-    bottom: 85px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    border-bottom: 2px dashed #e2e8f0;
-}
-
-/* CINEMATIC BRAND LOADER */
-.loader-container {
-    padding: 40px 0;
-    text-align: center;
-}
-
+/* CINEMATIC LOADER */
 .brand-spinner {
     width: 50px;
     height: 50px;
@@ -215,8 +234,15 @@ button:active { transform: scale(0.96); }
     margin: 0 auto 20px;
 }
 
-@keyframes brand-spin {
-    to { transform: rotate(360deg); }
+@keyframes brand-spin { to { transform: rotate(360deg); } }
+
+/* UTILITIES */
+.hidden { display: none; }
+
+#guestList {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-teal) transparent;
 }
 
-.hidden { display: none; }
+#guestList::-webkit-scrollbar { width: 4px; }
+#guestList::-webkit-scrollbar-thumb { background: var(--brand-teal); border-radius: 10px; }

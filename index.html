@@ -15,6 +15,10 @@
 </head>
 <body>
 
+<a href="https://wa.me/2547XXXXXXXX?text=Hi,%20I'm%20having%20trouble%20with%20my%20film%20premiere%20ticket." class="help-float" target="_blank">
+    Need Help?
+</a>
+
 <div class="container">
     <div class="card">
         <div id="customerView">
@@ -23,7 +27,6 @@
                     <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
                 </div>
                 <div class="brand-name">MUTCU</div>
-                
                 <h1>Film Premiere</h1>
                 <p style="color: var(--brand-teal); font-weight: 600; letter-spacing: 1px; margin-top: -5px;">EXCLUSIVE CINEMATIC ACCESS</p>
             </header>
@@ -106,7 +109,7 @@
             
             <div style="margin-top: 30px;">
                 <label style="color: var(--text-main);">Guest List</label>
-                <div id="guestList" style="max-height: 300px; overflow-y: auto;">Loading...</div>
+                <div id="guestList" style="max-height: 400px; overflow-y: auto;">Loading...</div>
             </div>
             
             <button onclick="window.location.hash=''" style="background:#333; margin-top: 20px;">Exit Admin</button>
@@ -170,33 +173,28 @@
         }
     }
 
-    // UPDATED DISCORD NOTIFICATION
     async function notifyDiscord(name, type, code) {
         if (!WEBHOOK_URL) return;
-        
         const payload = {
             embeds: [{
-                title: "🎬 New Ticket Request",
-                color: 3659216, // Teal color
+                title: "🎬 Ticket Approval Required",
+                color: 0x37d7d0,
                 fields: [
-                    { name: "Guest Name", value: name, inline: true },
+                    { name: "Guest", value: name, inline: true },
                     { name: "Category", value: type, inline: true },
-                    { name: "M-Pesa Code", value: `\`${code}\``, inline: false }
+                    { name: "M-Pesa Code", value: `**${code}**`, inline: false }
                 ],
-                footer: { text: "MUTCU Payment Verification System" },
+                footer: { text: "MUTCU Payment Verification" },
                 timestamp: new Date()
             }]
         };
-
         try {
             await fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-        } catch (e) {
-            console.error("Discord Error", e);
-        }
+        } catch (e) { console.error("Discord Error", e); }
     }
 
     function toggleGroupFields() {
@@ -223,7 +221,7 @@
         if (!/^[A-Z0-9]{10}$/.test(mpesaCode)) return alert("❌ Invalid M-Pesa Code.");
         
         const btn = document.getElementById('submitBtn');
-        btn.innerText = "Processing...";
+        btn.innerText = "Sending Request...";
         btn.disabled = true;
 
         let groupNames = "";
@@ -239,7 +237,7 @@
         }]).select();
 
         if (error) {
-            alert("This M-Pesa code has already been used.");
+            alert("This M-Pesa code is already in use.");
             btn.disabled = false;
             btn.innerText = "Get My Ticket";
         } else {
@@ -252,7 +250,7 @@
     };
 
     async function showRetrievePrompt() {
-        const input = prompt("Enter M-Pesa Code:");
+        const input = prompt("Enter M-Pesa Code to retrieve ticket:");
         if(!input) return;
         const code = input.toUpperCase().trim();
         const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
@@ -260,6 +258,7 @@
             document.getElementById('ticketForm').classList.add('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             if(data.status === 'approved') renderTicket(data);
+            else if(data.status === 'rejected') showRejectedState(code);
             else startPolling(code);
         } else alert("Ticket not found.");
     }
@@ -269,9 +268,18 @@
         statusArea.innerHTML = `
             <div class="loader-container">
                 <div class="brand-spinner"></div>
-                <h3 style="color: var(--brand-teal); letter-spacing: 1px; text-align:center;">VERIFYING PAYMENT</h3>
-                <p style="font-size: 0.8rem; text-align:center;">Checking M-Pesa code: <b style="color:var(--brand-orange)">${code}</b></p>
-                <p style="font-size: 0.7rem; color: var(--text-dim); text-align:center; margin-top:10px;">Notifications sent to Admin for approval.</p>
+                <h3 style="color: var(--brand-teal); text-align:center;">VERIFYING PAYMENT</h3>
+                <p style="font-size: 0.9rem; text-align:center; margin-bottom: 20px;">
+                    Code: <b style="color:var(--brand-orange)">${code}</b>
+                </p>
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
+                    <p style="font-size: 0.8rem; line-height: 1.4;">
+                        🎬 <b>Take a break!</b> Approval is manual and may take 2-5 minutes.
+                    </p>
+                    <p style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px;">
+                        You can close this page. Re-enter your code using "Retrieve Ticket" later.
+                    </p>
+                </div>
             </div>
         `;
 
@@ -279,22 +287,32 @@
             const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
             if (data && data.status === 'approved') {
                 clearInterval(interval);
-                statusArea.innerHTML = `
-                    <h3 id="statusMsg" class="verify-pulse" style="text-align: center; color: var(--brand-teal); margin-bottom: 20px; font-weight: 800;"></h3>
+                statusArea.innerHTML = `<h3 id="statusMsg" class="verify-pulse" style="text-align: center; color: var(--brand-teal); margin-bottom: 20px; font-weight: 800;"></h3>
                     <div id="printableTicket">
-                        <div id="displayType">Category</div>
-                        <h2 style="font-size: 1.1em; letter-spacing: 1px; margin: 15px 0; color: var(--brand-navy); font-weight: 900;">OFFICIAL ENTRANCE PASS</h2>
+                        <div id="displayType"></div>
+                        <h2 style="font-size: 1.1em; letter-spacing: 1px; margin: 15px 0; color: #04162e; font-weight: 900;">OFFICIAL ENTRANCE PASS</h2>
                         <div id="qrcode"></div>
                         <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                            <div id="displayName" style="font-weight: 800; font-size: 1.1rem; color: #000;">Guest Name</div>
-                            <div style="font-size: 0.7rem; color: #666; margin-top: 5px; text-transform: uppercase;">VERIFICATION ID: <span id="displayId" style="font-weight:bold; color: var(--brand-pink);">---</span></div>
+                            <div id="displayName" style="font-weight: 800; font-size: 1.1rem; color: #000;"></div>
+                            <div style="font-size: 0.7rem; color: #666; margin-top: 5px;">VERIFICATION ID: <span id="displayId" style="font-weight:bold; color: var(--brand-pink);"></span></div>
                         </div>
                     </div>
-                    <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px;">💾 Save to Gallery</button>
-                `;
+                    <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px;">💾 Save to Gallery</button>`;
                 renderTicket(data);
+            } else if (data && data.status === 'rejected') {
+                clearInterval(interval);
+                showRejectedState(code);
             }
         }, 3000);
+    }
+
+    function showRejectedState(code) {
+        document.getElementById('statusArea').innerHTML = `
+            <div style="text-align: center; padding: 25px; background: rgba(244, 63, 94, 0.1); border: 2px solid var(--brand-pink); border-radius: 24px;">
+                <h2 style="color: var(--brand-pink); font-weight: 800;">❌ CODE REJECTED</h2>
+                <p style="font-size: 0.85rem; margin: 15px 0;">The code <b>${code}</b> could not be verified.</p>
+                <button onclick="location.reload()" style="background: var(--brand-pink); color: white;">Try Again</button>
+            </div>`;
     }
 
     function renderTicket(data) {
@@ -303,14 +321,9 @@
         document.getElementById('displayType').innerText = data.ticket_type;
         document.getElementById('displayId').innerText = data.id;
         document.getElementById("qrcode").innerHTML = ""; 
-        
         setTimeout(() => {
             new QRCode(document.getElementById("qrcode"), { 
-                text: `ID:${data.id}`, 
-                width: 160, 
-                height: 160,
-                colorDark : "#04162e",
-                colorLight : "#ffffff"
+                text: `ID:${data.id}`, width: 160, height: 160, colorDark : "#04162e", colorLight : "#ffffff"
             });
             document.getElementById('downloadBtn').classList.remove('hidden');
         }, 500);
@@ -331,17 +344,32 @@
         document.getElementById('statIn').innerText = data.filter(t => t.checked_in).length;
         const list = document.getElementById('guestList');
         list.innerHTML = "";
-        data.sort((a,b) => (a.status === 'pending' ? -1 : 1)).forEach(t => {
+        data.forEach(t => {
             const div = document.createElement('div');
-            div.style = "background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border: 1px solid var(--glass-border);";
-            div.innerHTML = `<div><strong style="color:var(--text-main)">${t.name}</strong><br><small style="color:var(--text-dim)">${t.mpesa_code} | ${t.ticket_type}</small></div>
-                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:8px 15px; margin:0; font-size:12px; background: var(--brand-teal);">Approve</button>` : `<span style="color:var(--brand-teal); font-size:12px; font-weight:800;">✓ APPROVED</span>`}`;
+            div.style = "background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:10px; border: 1px solid var(--glass-border);";
+            
+            let actionButtons = "";
+            if (t.status === 'pending') {
+                actionButtons = `
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button onclick="updateStatus(${t.id}, 'approved')" style="flex:1; padding:8px; font-size:12px; background: var(--brand-teal); margin:0;">Approve</button>
+                        <button onclick="updateStatus(${t.id}, 'rejected')" style="flex:1; padding:8px; font-size:12px; background: var(--brand-pink); margin:0;">Reject</button>
+                    </div>`;
+            } else {
+                const color = t.status === 'approved' ? 'var(--brand-teal)' : 'var(--brand-pink)';
+                actionButtons = `<div style="text-align:right; color:${color}; font-size:12px; font-weight:800; margin-top:5px;">✓ ${t.status.toUpperCase()}</div>`;
+            }
+
+            div.innerHTML = `<div><strong style="color:var(--text-main)">${t.name}</strong><br>
+                <small style="color:var(--text-dim)">${t.mpesa_code} | ${t.ticket_type}</small>
+                ${t.group_members ? `<br><small style="color:var(--brand-orange)">Members: ${t.group_members}</small>` : ''}
+                </div>${actionButtons}`;
             list.appendChild(div);
         });
     }
 
-    async function approve(id) {
-        await _supabase.from('tickets').update({ status: 'approved' }).eq('id', id);
+    async function updateStatus(id, newStatus) {
+        await _supabase.from('tickets').update({ status: newStatus }).eq('id', id);
         loadAdminData();
     }
 
@@ -349,9 +377,8 @@
         const { data } = await _supabase.from('tickets').select('*');
         const csv = "Name,Phone,Type,Mpesa,Status\n" + data.map(t => `${t.name},${t.phone},${t.ticket_type},${t.mpesa_code},${t.status}`).join("\n");
         const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = 'GuestList.csv'; a.click();
+        a.href = window.URL.createObjectURL(blob); a.download = 'GuestList.csv'; a.click();
     }
 
     let scanner;
