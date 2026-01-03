@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Film Premiere | Official Tickets</title>
     
     <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
@@ -20,7 +20,7 @@
         <div id="customerView">
             <header>
                 <h1>Film Premiere</h1>
-                <p>Join us for <thead></thead> exclusive cinematic experience!</p>
+                <p>Join us for an exclusive cinematic experience!</p>
             </header>
 
             <div class="payment-info">
@@ -30,182 +30,233 @@
             </div>
 
             <form id="ticketForm">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" placeholder="Enter your official name" required>
+                <label>Full Name</label>
+                <input type="text" id="name" placeholder="Enter your name" required>
                 
-                <label for="phone">Phone Number</label>
+                <label>Phone Number</label>
                 <input type="tel" id="phone" placeholder="0712..." required>
                 
-                <label for="type">Ticket Category</label>
-                <select id="type">
+                <label>Ticket Category</label>
+                <select id="type" onchange="toggleGroupFields()">
                     <option value="Regular">Regular Admission — 100/-</option>
                     <option value="VIP">VIP Access — 200/-</option>
                     <option value="Group of 5">Group of 5 — 400/-</option>
                 </select>
 
-                <label for="code">M-Pesa Transaction Code</label>
+                <div id="groupFields" class="hidden">
+                    <label>Other Member Names</label>
+                    <input type="text" class="member-name" placeholder="Name 2">
+                    <input type="text" class="member-name" placeholder="Name 3" style="margin-top:5px">
+                    <input type="text" class="member-name" placeholder="Name 4" style="margin-top:5px">
+                    <input type="text" class="member-name" placeholder="Name 5" style="margin-top:5px">
+                </div>
+
+                <label>M-Pesa Transaction Code</label>
                 <input type="text" id="code" placeholder="e.g. SAK8..." required>
                 
                 <button type="submit" id="submitBtn">Get My Ticket</button>
+                
+                <p style="text-align:center; font-size:12px; color:#666; margin-top:15px; cursor:pointer" onclick="showRetrievePrompt()">Already paid? Retrieve ticket</p>
             </form>
 
             <div id="statusArea" class="hidden">
-                <h3 id="statusMsg" style="text-align: center; margin-bottom: 20px;">Processing Payment...</h3>
-                
+                <h3 id="statusMsg" style="text-align: center;">Processing...</h3>
                 <div id="printableTicket">
-                    <div id="displayType">Category</div>
-                    <h2 style="margin: 10px 0; letter-spacing: 1px; font-size: 1.2em;">OFFICIAL ENTRANCE PASS</h2>
-                    
+                    <div id="displayType" style="font-weight:bold; color:var(--pink)">Category</div>
+                    <h2 style="font-size: 1.1em;">OFFICIAL ENTRANCE PASS</h2>
                     <div id="qrcode"></div>
-                    
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
-                        <div id="displayName" style="font-weight: 700; font-size: 1.1em;">Guest Name</div>
-                        <div style="font-size: 0.7em; color: #999; margin-top: 5px;">TICKET ID: <span id="displayId">---</span></div>
+                    <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                        <div id="displayName" style="font-weight: 700;">Guest Name</div>
+                        <div style="font-size: 0.7em; color: #999;">ID: <span id="displayId">---</span></div>
                     </div>
                 </div>
-                
-                <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--teal); margin-top: 20px;">💾 Save Ticket to Gallery</button>
+                <button id="downloadBtn" class="hidden" onclick="downloadTicket()" style="background: var(--teal);">💾 Save to Gallery</button>
             </div>
         </div>
 
         <div id="adminView" class="hidden">
             <header>
                 <h1>Admin Panel</h1>
-                <p>Manage check-ins and approvals.</p>
+                <div style="display:flex; gap:10px; margin-bottom:20px">
+                    <div style="flex:1; background:#eee; padding:10px; border-radius:10px; text-align:center">
+                        <small>Approved</small><br><strong id="statApproved">0</strong>
+                    </div>
+                    <div style="flex:1; background:#eee; padding:10px; border-radius:10px; text-align:center">
+                        <small>In</small><br><strong id="statIn">0</strong>
+                    </div>
+                </div>
             </header>
             
             <div id="scannerSection" class="hidden">
                 <div id="reader"></div>
-                <button onclick="stopScanner()" style="background:#e74c3c; margin-top: 10px;">Close Scanner</button>
+                <button onclick="stopScanner()" style="background:#e74c3c;">Close Scanner</button>
             </div>
 
-            <button id="scanBtn" onclick="startScanner()" style="background: var(--navy);">📷 Scan QR Code</button>
+            <button onclick="startScanner()" style="background: var(--navy);">📷 Scan QR Code</button>
+            <button onclick="exportToCSV()" style="background: var(--teal); margin-top:10px">📥 Export CSV</button>
             
-            <div style="margin-top: 30px;">
-                <label>Pending Approvals</label>
-                <div id="pendingList">Loading...</div>
+            <div style="margin-top: 20px;">
+                <label>Guest List (Pending first)</label>
+                <div id="guestList">Loading...</div>
             </div>
             
-            <button class="admin-btn" onclick="window.location.hash=''">Exit Admin Mode</button>
+            <button onclick="window.location.hash=''" style="background:#999">Exit Admin</button>
         </div>
     </div>
 </div>
 
 <script>
-   // Config
     const SUPABASE_URL = "https://wpdtbiedtkjmsiarpchk.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwZHRiaWVkdGtqbXNpYXJwY2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MDA1NTMsImV4cCI6MjA4Mjk3NjU1M30.bbOsMvs-TJYd7Lh4f7xlwEqz6UwMJK4ktTGVD4hO764";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const ADMIN_PASSWORD = "1234";
 
-    const ADMIN_PASSWORD = "1234"; // Change this to your preferred PIN
+    // Persistence Setup
+    function setupPersistence() {
+        const fields = ['name', 'phone', 'type', 'code'];
+        fields.forEach(id => {
+            const saved = localStorage.getItem('draft_' + id);
+            if (saved) document.getElementById(id).value = saved;
+            document.getElementById(id).addEventListener('input', (e) => {
+                localStorage.setItem('draft_' + id, e.target.value);
+            });
+        });
+        toggleGroupFields();
+    }
 
-    // Navigation Logic with Password Protection
+    function toggleGroupFields() {
+        const isGroup = document.getElementById('type').value === 'Group of 5';
+        document.getElementById('groupFields').classList.toggle('hidden', !isGroup);
+    }
+
     async function route() {
         const isAdmin = window.location.hash === '#admin';
-        const customerView = document.getElementById('customerView');
-        const adminView = document.getElementById('adminView');
-
         if (isAdmin) {
-            const password = prompt("Enter Admin PIN to access dashboard:");
-            if (password === ADMIN_PASSWORD) {
-                customerView.classList.add('hidden');
-                adminView.classList.remove('hidden');
-                loadPendingTickets();
+            const pw = prompt("Admin PIN:");
+            if (pw === ADMIN_PASSWORD) {
+                document.getElementById('customerView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                loadAdminData();
             } else {
-                alert("Incorrect PIN.");
-                window.location.hash = ''; // Boot them back to the home page
+                window.location.hash = '';
             }
         } else {
-            customerView.classList.remove('hidden');
-            adminView.classList.add('hidden');
+            document.getElementById('customerView').classList.remove('hidden');
+            document.getElementById('adminView').classList.add('hidden');
         }
     }
 
-    // Listen for hash changes and initial load
-    window.addEventListener('hashchange', route);
-    window.addEventListener('DOMContentLoaded', route);
-
-    // --- CUSTOMER LOGIC ---
-
+    // --- CUSTOMER ACTIONS ---
     document.getElementById('ticketForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
-        btn.innerText = "Verifying...";
+        btn.innerText = "Processing...";
         btn.disabled = true;
+
+        const memberInputs = document.querySelectorAll('.member-name');
+        let groupNames = "";
+        memberInputs.forEach(i => { if(i.value) groupNames += i.value + ", "; });
 
         const { data, error } = await _supabase.from('tickets').insert([{
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
             ticket_type: document.getElementById('type').value,
             mpesa_code: document.getElementById('code').value.toUpperCase(),
+            group_members: groupNames,
             status: 'pending'
         }]).select();
 
         if (error) {
-            alert("This M-Pesa code has already been used!");
-            btn.innerText = "Get My Ticket";
+            alert("Error: Code likely already used.");
             btn.disabled = false;
         } else {
+            ['name', 'phone', 'type', 'code'].forEach(id => localStorage.removeItem('draft_' + id));
             document.getElementById('ticketForm').classList.add('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             startPolling(data[0].mpesa_code);
         }
     };
 
+    async function showRetrievePrompt() {
+        const code = prompt("Enter M-Pesa Code:").toUpperCase();
+        if(!code) return;
+        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
+        if(data) {
+            document.getElementById('ticketForm').classList.add('hidden');
+            document.getElementById('statusArea').classList.remove('hidden');
+            if(data.status === 'approved') renderTicket(data);
+            else startPolling(code);
+        } else alert("Not found.");
+    }
+
     function startPolling(code) {
         const interval = setInterval(async () => {
             const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
             if (data && data.status === 'approved') {
                 clearInterval(interval);
-                document.getElementById('statusMsg').innerHTML = "✅ Verified!<br>Scan this at the entrance.";
-                document.getElementById('displayName').innerText = data.name;
-                document.getElementById('displayType').innerText = data.ticket_type;
-                document.getElementById('displayId').innerText = data.id;
-
-                document.getElementById("qrcode").innerHTML = ""; 
-                new QRCode(document.getElementById("qrcode"), {
-                    text: `ID:${data.id}`,
-                    width: 180, height: 180,
-                    colorDark : "#0d1b3e",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-                document.getElementById('downloadBtn').classList.remove('hidden');
+                renderTicket(data);
             }
         }, 3000);
     }
 
+    function renderTicket(data) {
+        document.getElementById('statusMsg').innerHTML = "✅ Verified!";
+        document.getElementById('displayName').innerText = data.name;
+        document.getElementById('displayType').innerText = data.ticket_type;
+        document.getElementById('displayId').innerText = data.id;
+        document.getElementById("qrcode").innerHTML = ""; 
+        new QRCode(document.getElementById("qrcode"), { text: `ID:${data.id}`, width: 150, height: 150 });
+        document.getElementById('downloadBtn').classList.remove('hidden');
+    }
+
     async function downloadTicket() {
-        const ticket = document.getElementById('printableTicket');
-        const canvas = await html2canvas(ticket, { scale: 3, backgroundColor: "#ffffff" });
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 2 });
         const link = document.createElement('a');
-        link.download = `Ticket_${document.getElementById('displayName').innerText}.png`;
+        link.download = 'My_Ticket.png';
         link.href = canvas.toDataURL();
         link.click();
     }
 
-    // --- ADMIN LOGIC ---
+    // --- ADMIN ACTIONS ---
+    async function loadAdminData() {
+        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
+        if(!data) return;
 
-    async function loadPendingTickets() {
-        const list = document.getElementById('pendingList');
-        const { data } = await _supabase.from('tickets').select('*').eq('status', 'pending');
-        list.innerHTML = data?.length ? "" : "<p style='color:#999;'>No pending tickets.</p>";
-        data?.forEach(t => {
+        document.getElementById('statApproved').innerText = data.filter(t => t.status === 'approved').length;
+        document.getElementById('statIn').innerText = data.filter(t => t.checked_in).length;
+
+        const list = document.getElementById('guestList');
+        list.innerHTML = "";
+        
+        // Sort Pending to top
+        data.sort((a,b) => (a.status === 'pending' ? -1 : 1)).forEach(t => {
             const div = document.createElement('div');
             div.className = "admin-item";
+            if(t.status === 'pending') div.style.borderLeft = "4px solid var(--orange)";
             div.innerHTML = `
                 <div>
-                    <strong>${t.name}</strong><br>
-                    <small>${t.mpesa_code} | ${t.ticket_type}</small>
+                    <strong>${t.name}</strong><br><small>${t.mpesa_code} | ${t.ticket_type}</small>
                 </div>
-                <button onclick="approve(${t.id})" style="padding: 8px 15px; width: auto;">Approve</button>`;
+                ${t.status === 'pending' ? `<button onclick="approve(${t.id})" style="width:auto; padding:5px 10px; background:var(--orange)">Approve</button>` : `<small>Verified</small>`}
+            `;
             list.appendChild(div);
         });
     }
 
     async function approve(id) {
         await _supabase.from('tickets').update({ status: 'approved' }).eq('id', id);
-        loadPendingTickets();
+        loadAdminData();
+    }
+
+    async function exportToCSV() {
+        const { data } = await _supabase.from('tickets').select('*');
+        const csv = "Name,Phone,Type,Mpesa,Status\n" + data.map(t => `${t.name},${t.phone},${t.ticket_type},${t.mpesa_code},${t.status}`).join("\n");
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'GuestList.csv';
+        a.click();
     }
 
     let scanner;
@@ -216,18 +267,23 @@
             const id = txt.split(':')[1];
             stopScanner();
             const { data } = await _supabase.from('tickets').select('*').eq('id', id).single();
-            if (!data) alert("❌ Invalid Ticket");
-            else if (data.checked_in) alert("⚠️ ALREADY USED by " + data.name);
+            if (!data) alert("Invalid");
+            else if (data.checked_in) alert("Used by " + data.name);
             else {
                 await _supabase.from('tickets').update({ checked_in: true }).eq('id', id);
-                alert("✅ WELCOME: " + data.name);
+                alert("Welcome " + data.name);
+                loadAdminData();
             }
         });
     }
 
-    function stopScanner() {
-        if (scanner) scanner.stop().then(() => document.getElementById('scannerSection').classList.add('hidden'));
-    }
+    function stopScanner() { if(scanner) scanner.stop().then(() => document.getElementById('scannerSection').classList.add('hidden')); }
+
+    window.addEventListener('hashchange', route);
+    window.addEventListener('DOMContentLoaded', () => {
+        setupPersistence();
+        route();
+    });
 </script>
 </body>
 </html>
