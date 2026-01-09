@@ -8,14 +8,21 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.4/build/intasend-inline.js"></script>
+    <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
     
     <link rel="stylesheet" href="./style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .hidden { display: none !important; }
+        .admin-btn { background: #333; color: #fff; font-size: 10px; padding: 5px; border: none; cursor: pointer; position: fixed; bottom: 10px; left: 10px; opacity: 0.5; border-radius: 4px; }
+        .admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; overflow-y: auto; color: black; font-family: sans-serif; }
+        .member-input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+    </style>
 </head>
 <body>
 
-<a href="https://wa.me/2547XXXXXXXX" class="help-float" target="_blank">Need Help?</a>
+<a href="https://wa.me/254114516617" class="help-float" target="_blank">Need Help?</a>
 
 <div class="container">
     <div class="card">
@@ -53,12 +60,12 @@
                     <span id="availabilityMsg" style="font-size: 0.8rem; color: var(--text-dim);">Checking availability...</span>
                 </div>
 
-                <div id="groupFields" class="hidden">
-                    <label>Group Member Names</label>
-                    <input type="text" class="member-name" placeholder="Member 2" style="margin-bottom: 8px;">
-                    <input type="text" class="member-name" placeholder="Member 3" style="margin-bottom: 8px;">
-                    <input type="text" class="member-name" placeholder="Member 4" style="margin-bottom: 8px;">
-                    <input type="text" class="member-name" placeholder="Member 5">
+                <div id="groupFields" class="hidden" style="margin-top: 15px; background: #f4f7f6; padding: 15px; border-radius: 10px; border-left: 4px solid var(--brand-teal);">
+                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--brand-navy);">Group Member Names (4 others):</p>
+                    <input type="text" class="member-name member-input" placeholder="Member 2 Name">
+                    <input type="text" class="member-name member-input" placeholder="Member 3 Name">
+                    <input type="text" class="member-name member-input" placeholder="Member 4 Name">
+                    <input type="text" class="member-name member-input" placeholder="Member 5 Name">
                 </div>
                 
                 <button type="submit" id="submitBtn">Pay and Get Ticket</button>
@@ -73,9 +80,37 @@
     </div>
 </div>
 
+<button class="admin-btn" onclick="openAdmin()">Admin Login</button>
+
+<div id="adminModal" class="admin-modal hidden">
+    <div style="max-width: 1000px; margin: auto;">
+        <div style="display:flex; justify-content: space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+            <h2 style="margin:0;">Paid Ticket List</h2>
+            <div>
+                <button onclick="exportCSV()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor:pointer;">Download CSV</button>
+                <button onclick="document.getElementById('adminModal').classList.add('hidden')" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor:pointer;">Close</button>
+            </div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Phone</th>
+                    <th>Group Members</th>
+                    <th>ID</th>
+                </tr>
+            </thead>
+            <tbody id="adminBody"></tbody>
+        </table>
+    </div>
+</div>
+
 <script>
-    const SUPABASE_URL = "https://jvrxmnvetjftssflgela.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2cnhtbnZldGpmdHNzZmxnZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0MjA5MzQsImV4cCI6MjA4Mjk5NjkzNH0.u0dufDHF9s7C4XhoVEQPqgBcjwdJtmjyC0f0J1yd310"; 
+    // --- CONFIGURATION ---
+    const SUPABASE_URL = "https://somzfvdzwpdexxixyltl.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvbXpmdmR6d3BkZXh4aXh5bHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjY0NjQsImV4cCI6MjA4MzUwMjQ2NH0.Q0WfNnyPMDmRvJhR1Mn-GEVhElcBAJS-tySRHcyQ2Ww"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
@@ -86,10 +121,9 @@
         startCountdown();
         updateFomoDisplay();
         
-        // CHECK FOR REDIRECT SUCCESS
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('checkout_id') && urlParams.has('name')) {
-            handleSuccessfulRedirect(urlParams);
+            savePaymentAndShowTicket(urlParams);
         }
     });
 
@@ -103,18 +137,17 @@
         let formattedPhone = phone.replace(/\D/g, ""); 
         if (formattedPhone.startsWith("0")) formattedPhone = "254" + formattedPhone.substring(1);
 
-        btn.innerText = "Redirecting to Payment...";
+        btn.innerText = "Opening M-Pesa...";
         btn.disabled = true;
 
-        // Use IntaSend Redirection to avoid the "Processing" hang
-        const intasend = new IntaSend({
-            public_key: INTASEND_KEY,
-            live: false 
-        });
+        const intasend = new IntaSend({ public_key: INTASEND_KEY, live: false });
 
-        // We pass the data in the URL so we can save it to Supabase after the user returns
+        // Get group names
         let groupNames = "";
-        document.querySelectorAll('.member-name').forEach(i => { if(i.value) groupNames += i.value + ", "; });
+        if(type === "Group of 5") {
+            const inputs = document.querySelectorAll('.member-name');
+            groupNames = Array.from(inputs).map(i => i.value).filter(v => v !== "").join(", ");
+        }
         
         const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${formattedPhone}&type=${encodeURIComponent(type)}&members=${encodeURIComponent(groupNames)}`;
 
@@ -122,61 +155,50 @@
             amount: PRICES[type],
             currency: "KES",
             phone_number: formattedPhone,
-            email: "guest@mutcu.com",
+            first_name: name,
             redirect_url: returnUrl
         });
     };
 
-    async function handleSuccessfulRedirect(params) {
+    async function savePaymentAndShowTicket(params) {
         const statusArea = document.getElementById('statusArea');
-        const ticketForm = document.getElementById('ticketForm');
-        
-        ticketForm.classList.add('hidden');
+        document.getElementById('ticketForm').classList.add('hidden');
         statusArea.classList.remove('hidden');
-        statusArea.innerHTML = "<h3>Finalizing your ticket...</h3>";
+        statusArea.innerHTML = "<div style='text-align:center;'><h3>Saving your ticket...</h3></div>";
 
         const { data, error } = await _supabase.from('tickets').insert([{
             name: params.get('name'),
             phone: params.get('phone'),
             ticket_type: params.get('type'),
-            mpesa_code: params.get('checkout_id'), // Use checkout_id as ref
+            mpesa_code: params.get('checkout_id'), 
             group_members: params.get('members'),
             status: 'approved' 
         }]).select();
 
-        if (!error) {
+        if (!error && data.length > 0) {
             renderTicket(data[0]);
-            // Clean URL
             window.history.replaceState({}, document.title, window.location.pathname);
         } else {
-            statusArea.innerHTML = "Error saving ticket: " + error.message;
+            statusArea.innerHTML = "<p style='color:red;'>Error: " + (error?.message || "Failed to save") + "</p>";
         }
     }
 
-    // --- REMAINDER OF UTILITY FUNCTIONS (renderTicket, download, etc) ---
     function renderTicket(data) {
         const statusArea = document.getElementById('statusArea');
         statusArea.innerHTML = `
-            <h3 id="statusMsg" style="text-align: center; color: var(--brand-teal); font-weight: 800; margin-bottom:15px;">✅ TICKET VERIFIED!</h3>
-            <div id="printableTicket" style="background:white; padding:20px; border-radius:15px; text-align:center; color:#000;">
+            <div id="printableTicket" style="background:white; padding:20px; border-radius:15px; text-align:center; color:#000; border: 2px solid #eee;">
                 <div style="background:var(--brand-navy); color:white; padding:5px 15px; border-radius:50px; display:inline-block; font-size:12px; margin-bottom:10px;">${data.ticket_type}</div>
-                <h2 style="margin: 10px 0; font-size:1.2rem;">OFFICIAL ENTRANCE PASS</h2>
+                <h2 style="margin: 5px 0; font-size:1.4rem;">MOVIE PREMIERE</h2>
                 <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
                 <div style="border-top:1px dashed #ccc; padding-top:15px;">
-                    <div style="font-weight:900; font-size:1.1rem;">${data.name}</div>
-                    <div style="font-size:11px; color:#666; margin-top:5px;">REF: ${data.mpesa_code}</div>
+                    <div style="font-weight:900; font-size:1.2rem;">${data.name}</div>
+                    <div style="font-size:11px; color:#666;">Code: ${data.mpesa_code}</div>
+                    ${data.group_members ? `<div style="font-size:10px; margin-top:8px;">Group: ${data.group_members}</div>` : ""}
                 </div>
             </div>
-            <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer;">💾 Save to Gallery</button>
+            <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer; font-weight:bold;">💾 Download to Phone</button>
         `;
-        new QRCode(document.getElementById("qrcode"), { text: `ID:${data.id}`, width: 160, height: 160 });
-    }
-
-    async function updateFomoDisplay() {
-        const type = document.getElementById('type').value;
-        const { count } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
-        const remaining = CAPACITY[type] - (count || 0);
-        document.getElementById('availabilityMsg').innerText = remaining > 0 ? `${remaining} tickets left` : "SOLD OUT";
+        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 160, height: 160 });
     }
 
     function toggleGroupFields() {
@@ -184,6 +206,52 @@
         document.getElementById('groupFields').classList.toggle('hidden', !isGroup);
     }
 
+    async function downloadTicket() {
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
+        const link = document.createElement('a');
+        link.download = `MUTCU_Ticket.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    // --- ADMIN LOGIC ---
+    async function openAdmin() {
+        const pin = prompt("Enter Admin PIN:");
+        if(pin !== "1234") return alert("Wrong PIN");
+        
+        document.getElementById('adminModal').classList.remove('hidden');
+        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
+        
+        if (data) {
+            window.adminData = data;
+            document.getElementById('adminBody').innerHTML = data.map(t => `
+                <tr>
+                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                    <td>${t.name}</td>
+                    <td>${t.ticket_type}</td>
+                    <td>${t.phone}</td>
+                    <td>${t.group_members || '-'}</td>
+                    <td style="font-family:monospace; font-size:11px;">${t.mpesa_code}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    function exportCSV() {
+        if(!window.adminData) return;
+        let csv = "Date,Name,Type,Phone,Group Members,TransactionID\n";
+        window.adminData.forEach(t => {
+            csv += `${t.created_at},${t.name},${t.ticket_type},${t.phone},"${t.group_members}",${t.mpesa_code}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tickets_report.csv';
+        a.click();
+    }
+
+    // Existing countdown & retrieve logic
     function startCountdown() {
         const premiereDate = new Date("2026-02-15T18:00:00").getTime();
         setInterval(() => {
@@ -196,25 +264,24 @@
         }, 1000);
     }
 
-    async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
-        const link = document.createElement('a');
-        link.download = `MUTCU_Ticket.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
     async function showRetrievePrompt() {
-        const code = prompt("Enter your M-Pesa Transaction Code:");
+        const code = prompt("Enter your Transaction Code / Checkout ID:");
         if (!code) return;
-        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code.toUpperCase().trim()).single();
+        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code.trim()).single();
         if (data) {
             document.getElementById('ticketForm').classList.add('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             renderTicket(data);
         } else {
-            alert("No ticket found.");
+            alert("Ticket not found.");
         }
+    }
+
+    async function updateFomoDisplay() {
+        const type = document.getElementById('type').value;
+        const { count } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
+        const left = CAPACITY[type] - (count || 0);
+        document.getElementById('availabilityMsg').innerText = left > 0 ? `${left} tickets left` : "SOLD OUT";
     }
 </script>
 
