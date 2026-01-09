@@ -29,7 +29,7 @@
         <div id="customerView">
             <header>
                 <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center;">
-                    <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
+                    <img src="./logo.webp" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
                 </div>
                 <div class="brand-name">MUTCU</div>
                 <h1>Film Premiere</h1>
@@ -140,7 +140,11 @@
         btn.innerText = "Opening M-Pesa...";
         btn.disabled = true;
 
-        const intasend = new IntaSend({ public_key: INTASEND_KEY, live: false });
+        // Initialize IntaSend
+        const intasend = new IntaSend({ 
+            publicAPIKey: INTASEND_KEY, 
+            live: false 
+        });
 
         // Get group names
         let groupNames = "";
@@ -151,12 +155,24 @@
         
         const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${formattedPhone}&type=${encodeURIComponent(type)}&members=${encodeURIComponent(groupNames)}`;
 
+        // Event Listeners for Intasend
+        intasend.on("COMPLETE", (results) => {
+            window.location.href = returnUrl + "&checkout_id=" + results.checkout_id;
+        });
+
+        intasend.on("FAILED", (results) => {
+            alert("Payment failed or cancelled. Please try again.");
+            btn.innerText = "Pay and Get Ticket";
+            btn.disabled = false;
+        });
+
+        // Trigger the checkout
         intasend.run({
             amount: PRICES[type],
             currency: "KES",
             phone_number: formattedPhone,
             first_name: name,
-            redirect_url: returnUrl
+            email: "ticket@mutcu.com" // Required field for SDK v4
         });
     };
 
@@ -179,7 +195,7 @@
             renderTicket(data[0]);
             window.history.replaceState({}, document.title, window.location.pathname);
         } else {
-            statusArea.innerHTML = "<p style='color:red;'>Error: " + (error?.message || "Failed to save") + "</p>";
+            statusArea.innerHTML = `<p style="color:red;">Error: ${error?.message || "Failed to save"}</p>`;
         }
     }
 
@@ -187,7 +203,7 @@
         const statusArea = document.getElementById('statusArea');
         statusArea.innerHTML = `
             <div id="printableTicket" style="background:white; padding:20px; border-radius:15px; text-align:center; color:#000; border: 2px solid #eee;">
-                <div style="background:var(--brand-navy); color:white; padding:5px 15px; border-radius:50px; display:inline-block; font-size:12px; margin-bottom:10px;">${data.ticket_type}</div>
+                <div style="background:#1a2e44; color:white; padding:5px 15px; border-radius:50px; display:inline-block; font-size:12px; margin-bottom:10px;">${data.ticket_type}</div>
                 <h2 style="margin: 5px 0; font-size:1.4rem;">MOVIE PREMIERE</h2>
                 <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
                 <div style="border-top:1px dashed #ccc; padding-top:15px;">
@@ -196,7 +212,7 @@
                     ${data.group_members ? `<div style="font-size:10px; margin-top:8px;">Group: ${data.group_members}</div>` : ""}
                 </div>
             </div>
-            <button onclick="downloadTicket()" style="background: var(--brand-navy); color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer; font-weight:bold;">💾 Download to Phone</button>
+            <button onclick="downloadTicket()" style="background: #1a2e44; color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer; font-weight:bold;">💾 Download to Phone</button>
         `;
         new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 160, height: 160 });
     }
@@ -214,7 +230,6 @@
         link.click();
     }
 
-    // --- ADMIN LOGIC ---
     async function openAdmin() {
         const pin = prompt("Enter Admin PIN:");
         if(pin !== "1234") return alert("Wrong PIN");
@@ -251,7 +266,6 @@
         a.click();
     }
 
-    // Existing countdown & retrieve logic
     function startCountdown() {
         const premiereDate = new Date("2026-02-15T18:00:00").getTime();
         setInterval(() => {
