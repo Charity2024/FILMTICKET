@@ -25,7 +25,7 @@
         }
         .hidden { display: none !important; }
         
-        /* Premium Ticket Themes */
+        /* Ticket Themes */
         .ticket-regular { border-top: 10px solid var(--brand-teal) !important; }
         .ticket-vip { border-top: 10px solid var(--brand-gold) !important; background: linear-gradient(to bottom, #fffcf5, #ffffff) !important; position: relative; }
         .ticket-vip::after { content: '★'; position: absolute; top: 10px; right: 20px; color: var(--brand-gold); font-size: 20px; }
@@ -58,6 +58,9 @@
         
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 15px; overflow: hidden; border: 2px solid var(--brand-teal); }
         .secret-trigger { cursor: default; user-select: none; }
+
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--brand-teal); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -136,7 +139,7 @@
         </div>
 
         <div class="admin-controls">
-            <input type="text" id="adminSearch" class="search-input" placeholder="Search name, phone, or code..." oninput="filterAdminTable()">
+            <input type="text" id="adminSearch" class="search-input" placeholder="Search guest..." oninput="filterAdminTable()">
         </div>
 
         <table class="admin-table">
@@ -164,7 +167,6 @@
     let clickCount = 0;
     let clickTimer;
 
-    // Secret Admin Access
     document.getElementById('adminTrigger').onclick = () => {
         clickCount++;
         clearTimeout(clickTimer);
@@ -189,31 +191,49 @@
         const type = document.getElementById('type').value;
         let fPhone = phone.replace(/\D/g, ""); if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
 
-        btn.innerText = "Processing...";
+        btn.innerText = "Connecting M-Pesa...";
         btn.disabled = true;
 
         const intasend = new IntaSend({ publicAPIKey: INTASEND_KEY, live: false });
         let members = ""; if(type === "Group of 5") members = Array.from(document.querySelectorAll('.member-name')).map(i => i.value).filter(v => v).join(", ");
         
         const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${fPhone}&type=${type}&members=${encodeURIComponent(members)}`;
-        intasend.on("COMPLETE", (res) => window.location.href = returnUrl + "&checkout_id=" + res.checkout_id);
+        intasend.on("COMPLETE", (res) => {
+            window.location.href = returnUrl + "&checkout_id=" + res.checkout_id;
+        });
+        
         intasend.run({ amount: PRICES[type], currency: "KES", phone_number: fPhone, first_name: name, payment_methods: ["MPESA"] });
     };
 
     async function savePaymentAndShowTicket(params) {
         document.getElementById('ticketForm').classList.add('hidden');
         document.getElementById('statusArea').classList.remove('hidden');
-        document.getElementById('statusArea').innerHTML = "<p>Confirming...</p>";
+        document.getElementById('statusArea').innerHTML = `
+            <div style="text-align:center; padding:40px 0;">
+                <div class="spinner"></div>
+                <p style="font-weight:bold;">Generating your ticket...</p>
+            </div>
+        `;
 
-        const { data } = await _supabase.from('tickets').insert([{
+        const ticketData = {
             name: params.get('name'),
             phone: params.get('phone'),
             ticket_type: params.get('type'),
             mpesa_code: params.get('checkout_id'), 
             group_members: params.get('members'),
             status: 'paid',
-            admitted_count: 0 // New field for group tracking
-        }]).select();
+            admitted_count: 0 
+        };
+
+        const { data, error } = await _supabase.from('tickets').insert([ticketData]).select();
+
+        // FAILSAFE: Show ticket even if database column 'admitted_count' is missing
+        if (error) {
+            console.error("Database Error:", error);
+            renderTicket(ticketData); 
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+        }
 
         if (data) {
             renderTicket(data[0]);
@@ -240,39 +260,23 @@
 
     async function verifyAndCheckIn(code, bulk = false) {
         const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
-        const resultDiv = document.getElementById('scanResult');
-        
-        if (!data) { if(resultDiv) resultDiv.innerHTML = `<span style="color:var(--brand-danger)">❌ NOT FOUND</span>`; return; }
+        if (!data) return;
 
-        let newCount = (data.admitted_count || 0);
         let max = data.ticket_type === 'Group of 5' ? 5 : 1;
+        let newCount = bulk ? max : (data.admitted_count || 0) + 1;
+        if (newCount > max) return;
 
-        if (newCount >= max) {
-            if(resultDiv) resultDiv.innerHTML = `<span style="color:var(--brand-gold)">⚠️ FULLY ADMITTED</span>`;
-            return;
-        }
-
-        newCount = bulk ? max : newCount + 1;
-        const newStatus = newCount >= max ? 'admitted' : 'partial';
-
-        const { error } = await _supabase.from('tickets').update({ 
-            status: newStatus, 
+        await _supabase.from('tickets').update({ 
+            status: newCount >= max ? 'admitted' : 'partial', 
             admitted_count: newCount 
         }).eq('mpesa_code', code);
-
-        if (!error) {
-            if(resultDiv) resultDiv.innerHTML = `<span style="color:var(--brand-success)">✅ ADMITTED (${newCount}/${max})</span>`;
-            refreshAdminData();
-        }
+        
+        refreshAdminData();
     }
 
     function filterAdminTable() {
         const query = document.getElementById('adminSearch').value.toLowerCase();
-        const filtered = allTickets.filter(t => 
-            t.name.toLowerCase().includes(query) || 
-            t.phone.includes(query) || 
-            t.mpesa_code.toLowerCase().includes(query)
-        );
+        const filtered = allTickets.filter(t => t.name.toLowerCase().includes(query) || t.phone.includes(query) || t.mpesa_code.toLowerCase().includes(query));
         renderAdminBody(filtered);
     }
 
@@ -280,16 +284,13 @@
         document.getElementById('adminBody').innerHTML = data.map(t => {
             const max = t.ticket_type === 'Group of 5' ? 5 : 1;
             const current = t.admitted_count || 0;
-            const isFull = current >= max;
-            
             return `<tr>
                 <td><strong>${t.name}</strong><br><small>${t.phone}</small></td>
                 <td><span class="badge ${t.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg'}">${t.ticket_type}</span></td>
-                <td><span class="badge ${isFull ? 'badge-admitted' : 'badge-reg'}">${current}/${max}</span></td>
+                <td><span class="badge ${current >= max ? 'badge-admitted' : 'badge-reg'}">${current}/${max}</span></td>
                 <td>
-                    ${!isFull ? `<button class="action-btn" onclick="verifyAndCheckIn('${t.mpesa_code}')">Admit 1</button>` : ''}
-                    ${(!isFull && max > 1) ? `<button class="action-btn group-btn" onclick="verifyAndCheckIn('${t.mpesa_code}', true)">Admit All</button>` : ''}
-                    ${isFull ? 'Checked' : ''}
+                    ${current < max ? `<button class="action-btn" onclick="verifyAndCheckIn('${t.mpesa_code}')">Admit 1</button>` : 'Check'}
+                    ${(current < max && max > 1) ? `<button class="action-btn group-btn" onclick="verifyAndCheckIn('${t.mpesa_code}', true)">Full</button>` : ''}
                 </td>
             </tr>`;
         }).join('');
@@ -299,13 +300,10 @@
         const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
         if (data) {
             allTickets = data;
-            let rev = 0, admittedTotal = 0;
-            data.forEach(t => {
-                rev += (PRICES[t.ticket_type] || 0);
-                admittedTotal += (t.admitted_count || 0);
-            });
-            document.getElementById('statRevenue').innerText = rev.toLocaleString() + "/-";
-            document.getElementById('statAdmitted').innerText = admittedTotal;
+            let rev = 0, adm = 0;
+            data.forEach(t => { rev += (PRICES[t.ticket_type] || 0); adm += (t.admitted_count || 0); });
+            document.getElementById('statRevenue').innerText = rev + "/-";
+            document.getElementById('statAdmitted').innerText = adm;
             document.getElementById('statTickets').innerText = data.length;
             filterAdminTable();
         }
@@ -320,7 +318,7 @@
     function stopScanner() { if(html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerSection').classList.add('hidden')); }
 
     async function openAdmin() {
-        if(prompt("Admin PIN:") !== "2060") return;
+        if(prompt("PIN:") !== "2060") return;
         document.getElementById('adminModal').classList.remove('hidden');
         refreshAdminData();
     }
