@@ -11,104 +11,89 @@
     <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --brand-teal: #008080;
-            --brand-gold: #d4af37;
-            --brand-navy: #001f3f;
-            --bg-light: #f1f5f9;
+            --dark-bg: #050a14;
+            --card-bg: #0f172a;
+            --brand-teal: #2dd4bf;
+            --brand-gold: #fbbf24;
+            --input-fill: #1e293b;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
             margin: 0; 
             font-family: 'Inter', sans-serif; 
-            background: var(--bg-light); 
-            color: var(--brand-navy);
-            display: flex; justify-content: center; padding: 20px;
+            background-color: var(--dark-bg); 
+            background-image: radial-gradient(circle at top, #1e293b 0%, #050a14 100%);
+            color: white;
+            display: flex; justify-content: center; min-height: 100vh; padding: 20px;
         }
 
         .container { width: 100%; max-width: 450px; }
 
-        /* Main Card */
+        /* Glassmorphism Card */
         .card { 
-            background: white; border-radius: 24px; padding: 30px; 
-            box-shadow: 0 20px 40px rgba(0,31,63,0.1); border: 1px solid rgba(0,0,0,0.05);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px; padding: 30px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         header { text-align: center; margin-bottom: 25px; }
-        .brand-name { font-weight: 800; letter-spacing: 4px; color: var(--brand-teal); font-size: 14px; margin-bottom: 5px; }
-        h1 { font-family: 'Playfair Display', serif; font-size: 28px; margin: 0; color: var(--brand-navy); }
+        header img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--brand-teal); }
+        h1 { font-size: 24px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin: 0; background: linear-gradient(to right, var(--brand-teal), var(--brand-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* Timer */
+        /* Countdown Timer Look from Screenshot */
         .countdown-timer { 
-            display: flex; justify-content: space-around; background: var(--brand-navy); 
-            padding: 15px; border-radius: 16px; color: white; margin-bottom: 25px;
+            display: flex; justify-content: space-around; background: rgba(0, 0, 0, 0.3); 
+            padding: 15px; border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);
         }
-        .timer-unit span { display: block; font-size: 20px; font-weight: 800; }
-        .timer-unit small { font-size: 10px; opacity: 0.7; text-transform: uppercase; }
+        .timer-unit { text-align: center; }
+        .timer-unit span { display: block; font-size: 22px; font-weight: 800; color: var(--brand-teal); }
+        .timer-unit small { font-size: 10px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Form Styling */
-        label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #64748b; }
+        /* Inputs */
+        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; color: var(--brand-teal); letter-spacing: 1px; }
         input, select { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; 
-            margin-bottom: 20px; font-size: 16px; transition: 0.3s;
+            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); 
+            margin-bottom: 20px; font-size: 15px; background: var(--input-fill); color: white; transition: 0.3s;
         }
-        input:focus { border-color: var(--brand-teal); outline: none; box-shadow: 0 0 0 3px rgba(0,128,128,0.1); }
+        input::placeholder { color: rgba(255,255,255,0.3); }
+        input:focus { border-color: var(--brand-teal); outline: none; background: #26334d; }
 
-        button { 
-            width: 100%; padding: 16px; border-radius: 12px; border: none; 
-            background: var(--brand-teal); color: white; font-size: 16px; 
-            font-weight: 700; cursor: pointer; transition: 0.3s; 
+        /* The Gradient Button from Screenshot */
+        .pay-btn { 
+            width: 100%; padding: 18px; border-radius: 12px; border: none; 
+            background: linear-gradient(90deg, var(--brand-gold) 0%, var(--brand-teal) 100%);
+            color: #050a14; font-size: 16px; font-weight: 800; cursor: pointer; 
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
         }
-        button:active { transform: scale(0.98); }
+        .pay-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-        /* PREMIUM TICKET STYLE */
+        /* Ticket View */
         .ticket-visual {
-            background: white; border-radius: 20px; position: relative;
-            overflow: hidden; width: 320px; margin: 0 auto;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            background: white; border-radius: 15px; overflow: hidden; width: 100%; max-width: 320px;
+            margin: 0 auto; color: #0f172a; position: relative;
         }
-
-        /* Side Punch Holes */
-        .ticket-visual::before, .ticket-visual::after {
-            content: ''; position: absolute; width: 20px; height: 20px;
-            background: var(--bg-light); border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 2;
-        }
-        .ticket-visual::before { left: -10px; }
-        .ticket-visual::after { right: -10px; }
-
-        .ticket-header { padding: 25px 20px; border-bottom: 2px dashed #e2e8f0; text-align: center; }
-        .ticket-body { padding: 25px 20px; text-align: center; }
-
-        /* Category Themes */
-        .theme-regular { border-top: 8px solid var(--brand-teal); }
-        .theme-vip { border-top: 8px solid var(--brand-gold); background: #fffdf5; }
-        .theme-group { border-top: 8px solid #166534; }
-
-        .vip-star { color: var(--brand-gold); font-size: 24px; margin-bottom: 5px; }
-        .guest-name { font-family: 'Playfair Display', serif; font-size: 22px; margin: 10px 0; }
-        .badge { 
-            display: inline-block; padding: 5px 12px; border-radius: 20px; 
-            font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-        }
-        .badge-vip { background: var(--brand-gold); color: white; }
-        .badge-reg { background: var(--brand-teal); color: white; }
+        .ticket-header { background: #f8fafc; padding: 15px; text-align: center; border-bottom: 2px dashed #e2e8f0; }
+        .ticket-body { padding: 20px; text-align: center; }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .badge-vip { background: var(--brand-gold); color: black; }
+        .badge-reg { background: var(--brand-teal); color: black; }
 
         .hidden { display: none !important; }
-        .spinner { 
-            width: 40px; height: 40px; border: 4px solid #f3f3f3; 
-            border-top: 4px solid var(--brand-teal); border-radius: 50%; 
-            animation: spin 1s linear infinite; margin: 20px auto; 
-        }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--brand-teal); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Admin Styles */
-        .admin-modal { position: fixed; inset: 0; background: white; z-index: 2000; padding: 20px; overflow-y: auto; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .stat-box { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        /* Admin/Help Floating Button */
+        .help-btn { position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: white; padding: 10px 20px; border-radius: 50px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3); }
+        .help-btn::before { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -117,45 +102,47 @@
     <div class="card">
         <div id="customerView">
             <header>
-                <div id="adminTrigger" style="width: 70px; height: 70px; margin: 0 auto 10px; cursor: pointer;">
-                    <img src="./logo.webp" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                </div>
-                <div class="brand-name">MUTCU PRESENTS</div>
+                <img src="./logo.webp" alt="Logo" id="adminTrigger">
                 <h1>Film Premiere</h1>
             </header>
 
-            <div class="countdown-timer" id="timer">
-                <div class="timer-unit"><span id="days">00</span><small>Days</small></div>
-                <div class="timer-unit"><span id="hours">00</span><small>Hrs</small></div>
-                <div class="timer-unit"><span id="minutes">00</span><small>Min</small></div>
-                <div class="timer-unit"><span id="seconds">00</span><small>Sec</small></div>
+            <div class="countdown-timer">
+                <div class="timer-unit"><span id="days">37</span><small>Days</small></div>
+                <div class="timer-unit"><span id="hours">11</span><small>Hrs</small></div>
+                <div class="timer-unit"><span id="minutes">26</span><small>Min</small></div>
+                <div class="timer-unit"><span id="seconds">40</span><small>Sec</small></div>
             </div>
 
             <form id="ticketForm">
                 <label>FULL NAME</label>
-                <input type="text" id="name" placeholder="John Doe" required>
+                <input type="text" id="name" placeholder="Enter your name" required>
                 
-                <label>M-PESA PHONE NUMBER</label>
+                <label>PHONE NUMBER (M-PESA)</label>
                 <input type="tel" id="phone" placeholder="0712345678" required>
                 
-                <label>TICKET TYPE</label>
+                <label>TICKET CATEGORY</label>
                 <select id="type" onchange="toggleGroupFields();">
-                    <option value="Regular">Regular - KSH 100</option>
-                    <option value="VIP">VIP Experience - KSH 200</option>
-                    <option value="Group of 5">Group Discount - KSH 400</option>
+                    <option value="Regular">Regular Ticket - 100/-</option>
+                    <option value="VIP">VIP Ticket - 200/-</option>
+                    <option value="Group of 5">Group of 5 - 400/-</option>
                 </select>
 
-                <div id="groupFields" class="hidden" style="background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                    <label>LIST MEMBER NAMES</label>
-                    <input type="text" class="member-name" placeholder="Member 2">
-                    <input type="text" class="member-name" placeholder="Member 3">
-                    <input type="text" class="member-name" placeholder="Member 4">
-                    <input type="text" class="member-name" placeholder="Member 5">
+                <div id="groupFields" class="hidden">
+                    <label>GROUP MEMBERS</label>
+                    <input type="text" class="member-name" placeholder="Name 2">
+                    <input type="text" class="member-name" placeholder="Name 3">
+                    <input type="text" class="member-name" placeholder="Name 4">
+                    <input type="text" class="member-name" placeholder="Name 5">
                 </div>
                 
-                <button type="submit" id="submitBtn">PURCHASE TICKET</button>
-                <p style="text-align:center; font-size:12px; margin-top:20px; color:#64748b; cursor:pointer" onclick="showRetrievePrompt()">
-                    LOST YOUR TICKET? <b>RETRIEVE HERE</b>
+                <div style="text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 15px;">
+                    <span id="ticketCount">40</span> tickets left
+                </div>
+
+                <button type="submit" id="submitBtn" class="pay-btn">Pay and Get Ticket</button>
+                
+                <p style="text-align:center; font-size:12px; margin-top:20px; color:rgba(255,255,255,0.4); cursor:pointer" onclick="showRetrievePrompt()">
+                    ALREADY PAID? <span style="color:var(--brand-teal)">RETRIEVE TICKET</span>
                 </p>
             </form>
 
@@ -164,19 +151,7 @@
     </div>
 </div>
 
-<div id="adminModal" class="admin-modal hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0">Gate Control</h2>
-        <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#ef4444;">Exit</button>
-    </div>
-    <div class="stat-grid">
-        <div class="stat-box"><small>TOTAL REVENUE</small><div id="statRevenue" style="font-size:20px; font-weight:800;">0</div></div>
-        <div class="stat-box"><small>GUESTS INSIDE</small><div id="statAdmitted" style="font-size:20px; font-weight:800;">0</div></div>
-    </div>
-    <button onclick="startScanner()" style="margin-bottom:20px; background:var(--brand-navy);">📷 OPEN SCANNER</button>
-    <div id="reader"></div>
-    <div id="adminBody"></div>
-</div>
+<a href="#" class="help-btn">Need Help?</a>
 
 <script>
     const SUPABASE_URL = "https://somzfvdzwpdexxixyltl.supabase.co";
@@ -185,16 +160,6 @@
     
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
-
-    let html5QrCode;
-
-    // Admin Toggle
-    let clickCount = 0;
-    document.getElementById('adminTrigger').onclick = () => {
-        clickCount++;
-        if (clickCount >= 5) { clickCount = 0; openAdmin(); }
-        setTimeout(() => clickCount = 0, 3000);
-    };
 
     window.addEventListener('DOMContentLoaded', () => {
         startCountdown();
@@ -212,14 +177,13 @@
         let fPhone = phone.replace(/\D/g, ""); 
         if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
 
-        btn.innerText = "OPENING M-PESA...";
+        btn.innerText = "REDIRECTING...";
         btn.disabled = true;
 
         const intasend = new IntaSend({ publicAPIKey: INTASEND_KEY, live: false });
         let members = Array.from(document.querySelectorAll('.member-name')).map(i => i.value).filter(v => v).join(", ");
         
         const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${fPhone}&type=${type}&members=${encodeURIComponent(members)}`;
-        
         intasend.on("COMPLETE", (res) => { window.location.href = returnUrl + "&checkout_id=" + res.checkout_id; });
         intasend.run({ amount: PRICES[type], currency: "KES", phone_number: fPhone, first_name: name, payment_methods: ["MPESA"] });
     };
@@ -228,7 +192,7 @@
         document.getElementById('ticketForm').classList.add('hidden');
         const area = document.getElementById('statusArea');
         area.classList.remove('hidden');
-        area.innerHTML = `<div style="text-align:center;"><div class="spinner"></div><p>Generating Your Premium Pass...</p></div>`;
+        area.innerHTML = `<div style="text-align:center;"><div class="spinner"></div><p>Verifying Payment...</p></div>`;
 
         const ticketData = {
             name: params.get('name'),
@@ -246,66 +210,27 @@
     }
 
     function renderTicket(data) {
-        const theme = data.ticket_type === 'VIP' ? 'theme-vip' : (data.ticket_type === 'Group of 5' ? 'theme-group' : 'theme-regular');
-        const badgeClass = data.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg';
-        
         document.getElementById('statusArea').innerHTML = `
-            <div id="printableTicket" class="ticket-visual ${theme}">
+            <div id="printableTicket" class="ticket-visual">
                 <div class="ticket-header">
-                    <div style="font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #94a3b8; margin-bottom: 5px;">OFFICIAL ENTRY PASS</div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 20px;">Film Premiere 2026</div>
+                    <div style="font-size: 10px; font-weight: 800; opacity: 0.5;">FILM PREMIERE 2026</div>
                 </div>
                 <div class="ticket-body">
-                    ${data.ticket_type === 'VIP' ? '<div class="vip-star">★</div>' : ''}
-                    <div class="guest-name">${data.name}</div>
-                    <div style="margin-bottom: 20px;">
-                        <span class="badge ${badgeClass}">${data.ticket_type}</span>
-                    </div>
+                    <div style="font-size: 20px; font-weight: 800; margin-bottom: 5px;">${data.name}</div>
+                    <div style="margin-bottom: 15px;"><span class="badge ${data.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg'}">${data.ticket_type}</span></div>
                     <div id="qrcode" style="display:flex; justify-content:center; margin-bottom: 15px;"></div>
-                    <div style="font-family: monospace; font-size: 11px; color: #94a3b8;">REF: ${data.mpesa_code}</div>
+                    <div style="font-family: monospace; font-size: 10px; opacity: 0.5;">REF: ${data.mpesa_code}</div>
                 </div>
             </div>
-            <button onclick="downloadTicket()" style="margin-top: 25px; background: var(--brand-navy);">💾 SAVE TICKET TO GALLERY</button>
+            <button onclick="downloadTicket()" class="pay-btn" style="margin-top: 20px;">Save Ticket Image</button>
         `;
-        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 140, height: 140, colorDark: "#001f3f" });
-    }
-
-    // Admin & Support
-    async function verifyAndCheckIn(code) {
-        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
-        if (!data) return alert("Ticket Not Found!");
-        let max = data.ticket_type === 'Group of 5' ? 5 : 1;
-        if ((data.admitted_count || 0) >= max) return alert("Already Used!");
-        
-        await _supabase.from('tickets').update({ status: 'admitted', admitted_count: (data.admitted_count || 0) + 1 }).eq('mpesa_code', code);
-        alert(`ACCESS GRANTED: ${data.name}`);
-        refreshAdminData();
-    }
-
-    async function refreshAdminData() {
-        const { data } = await _supabase.from('tickets').select('*');
-        if (data) {
-            document.getElementById('statRevenue').innerText = "KSH " + data.reduce((acc, t) => acc + (PRICES[t.ticket_type] || 0), 0);
-            document.getElementById('statAdmitted').innerText = data.reduce((acc, t) => acc + (t.admitted_count || 0), 0);
-        }
-    }
-
-    function startScanner() {
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (code) => { verifyAndCheckIn(code); html5QrCode.stop(); });
-    }
-
-    async function openAdmin() {
-        if(prompt("PIN:") === "2060") {
-            document.getElementById('adminModal').classList.remove('hidden');
-            refreshAdminData();
-        }
+        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 140, height: 140 });
     }
 
     async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3, useCORS: true });
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
         const link = document.createElement('a');
-        link.download = `Premiere_Ticket_${Date.now()}.png`;
+        link.download = `Ticket_${Date.now()}.png`;
         link.href = canvas.toDataURL();
         link.click();
     }
