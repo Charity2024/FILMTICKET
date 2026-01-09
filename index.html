@@ -9,26 +9,64 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     
     <link rel="stylesheet" href="./style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --admin-bg: #f8fafc;
+            --admin-card: #ffffff;
+            --admin-accent: #0ea5e9;
+            --admin-text: #1e293b;
+            --brand-gold: #d4af37;
+            --brand-success: #10b981;
+            --brand-danger: #ef4444;
+        }
         .hidden { display: none !important; }
-        .admin-btn { background: #333; color: #fff; font-size: 10px; padding: 5px; border: none; cursor: pointer; position: fixed; bottom: 10px; left: 10px; opacity: 0.5; border-radius: 4px; }
-        .admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; overflow-y: auto; color: black; font-family: sans-serif; }
-        .member-input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        
+        /* Premium Ticket Themes */
+        .ticket-regular { border-top: 10px solid var(--brand-teal) !important; }
+        .ticket-vip { border-top: 10px solid var(--brand-gold) !important; background: linear-gradient(to bottom, #fffcf5, #ffffff) !important; position: relative; }
+        .ticket-vip::after { content: '★'; position: absolute; top: 10px; right: 20px; color: var(--brand-gold); font-size: 20px; }
+        .ticket-group { border-top: 10px solid #166534 !important; }
+
+        /* Admin Dashboard Styles */
+        .admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--admin-bg); z-index: 1000; color: var(--admin-text); font-family: 'Inter', sans-serif; overflow-y: auto; }
+        .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--admin-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .stat-card small { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 10px; }
+        .stat-card div { font-size: 24px; font-weight: 800; }
+
+        .admin-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input { flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
+
+        .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .admin-table th { background: #f1f5f9; padding: 15px; text-align: left; font-size: 13px; }
+        .admin-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-reg { background: #e0f2fe; color: #0369a1; }
+        .badge-vip { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .badge-group { background: #f0fdf4; color: #166534; }
+        .badge-admitted { background: #dcfce7; color: #15803d; border: 1px solid #bef267; }
+
+        .action-btn { background: var(--brand-teal); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
+        .action-btn:hover { opacity: 0.8; }
+        .group-btn { background: #166534; margin-left: 5px; }
+        
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 15px; overflow: hidden; border: 2px solid var(--brand-teal); }
+        .secret-trigger { cursor: default; user-select: none; }
     </style>
 </head>
 <body>
-
-<a href="https://wa.me/254114516617" class="help-float" target="_blank">Need Help?</a>
 
 <div class="container">
     <div class="card">
         <div id="customerView">
             <header>
-                <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center;">
+                <div id="adminTrigger" class="secret-trigger" style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center;">
                     <img src="./logo.webp" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
                 </div>
                 <div class="brand-name">MUTCU</div>
@@ -50,26 +88,21 @@
                 <input type="tel" id="phone" placeholder="0712345678" required>
                 
                 <label>Ticket Category</label>
-                <select id="type" onchange="updateFomoDisplay(); toggleGroupFields();">
+                <select id="type" onchange="toggleGroupFields();">
                     <option value="Regular">Regular Ticket - 100/-</option>
                     <option value="VIP">VIP Ticket - 200/-</option>
                     <option value="Group of 5">Group of 5 - 400/-</option>
                 </select>
 
-                <div id="fomoBox" style="text-align: center; margin-top: 15px;">
-                    <span id="availabilityMsg" style="font-size: 0.8rem; color: var(--text-dim);">Checking availability...</span>
-                </div>
-
                 <div id="groupFields" class="hidden" style="margin-top: 15px; background: #f4f7f6; padding: 15px; border-radius: 10px; border-left: 4px solid var(--brand-teal);">
-                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--brand-navy);">Group Member Names (4 others):</p>
-                    <input type="text" class="member-name member-input" placeholder="Member 2 Name">
-                    <input type="text" class="member-name member-input" placeholder="Member 3 Name">
-                    <input type="text" class="member-name member-input" placeholder="Member 4 Name">
-                    <input type="text" class="member-name member-input" placeholder="Member 5 Name">
+                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--brand-navy);">Group Member Names:</p>
+                    <input type="text" class="member-name member-input" placeholder="Member 2">
+                    <input type="text" class="member-name member-input" placeholder="Member 3">
+                    <input type="text" class="member-name member-input" placeholder="Member 4">
+                    <input type="text" class="member-name member-input" placeholder="Member 5">
                 </div>
                 
                 <button type="submit" id="submitBtn">Pay and Get Ticket</button>
-                
                 <p style="text-align:center; font-size:12px; margin-top:25px; cursor:pointer" onclick="showRetrievePrompt()">
                     Already paid? <span style="color:var(--brand-teal); font-weight: 700;">Retrieve ticket</span>
                 </p>
@@ -80,26 +113,39 @@
     </div>
 </div>
 
-<button class="admin-btn" onclick="openAdmin()">Admin Login</button>
-
 <div id="adminModal" class="admin-modal hidden">
-    <div style="max-width: 1000px; margin: auto;">
-        <div style="display:flex; justify-content: space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
-            <h2 style="margin:0;">Paid Ticket List</h2>
-            <div>
-                <button onclick="exportCSV()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor:pointer;">Download CSV</button>
-                <button onclick="document.getElementById('adminModal').classList.add('hidden')" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor:pointer;">Close</button>
+    <div class="admin-container">
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 25px;">
+            <h1 style="margin:0; font-size: 24px;">Gate Control</h1>
+            <div style="display:flex; gap: 10px;">
+                <button onclick="startScanner()" style="background: var(--brand-teal); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor:pointer; font-weight: 700;">📷 QR Scanner</button>
+                <button onclick="document.getElementById('adminModal').classList.add('hidden')" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor:pointer;">Exit</button>
             </div>
         </div>
-        <table style="width: 100%; border-collapse: collapse;">
+
+        <div id="scannerSection" class="hidden" style="margin-bottom: 30px; text-align: center; background: #111; padding: 30px 10px; border-radius: 20px; border: 4px solid var(--brand-teal);">
+            <div id="reader"></div>
+            <div id="scanResult" style="margin-top: 20px; color: white; font-weight: bold;"></div>
+            <button onclick="stopScanner()" style="margin-top: 15px; background: #fff; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer;">Close Scanner</button>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card"><small>Revenue</small><div id="statRevenue">0</div></div>
+            <div class="stat-card"><small>Guests Inside</small><div id="statAdmitted">0</div></div>
+            <div class="stat-card"><small>Total Sold</small><div id="statTickets">0</div></div>
+        </div>
+
+        <div class="admin-controls">
+            <input type="text" id="adminSearch" class="search-input" placeholder="Search name, phone, or code..." oninput="filterAdminTable()">
+        </div>
+
+        <table class="admin-table">
             <thead>
-                <tr style="background: #f8f9fa;">
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Phone</th>
-                    <th>Group Members</th>
-                    <th>ID</th>
+                <tr>
+                    <th>Guest</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="adminBody"></tbody>
@@ -108,23 +154,31 @@
 </div>
 
 <script>
-    // --- CONFIGURATION ---
     const SUPABASE_URL = "https://somzfvdzwpdexxixyltl.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvbXpmdmR6d3BkZXh4aXh5bHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjY0NjQsImV4cCI6MjA4MzUwMjQ2NH0.Q0WfNnyPMDmRvJhR1Mn-GEVhElcBAJS-tySRHcyQ2Ww"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
-    const CAPACITY = { "Regular": 50, "VIP": 20, "Group of 5": 10 };
+
+    let allTickets = [];
+    let clickCount = 0;
+    let clickTimer;
+
+    // Secret Admin Access
+    document.getElementById('adminTrigger').onclick = () => {
+        clickCount++;
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 3000);
+        if (clickCount >= 5) {
+            clickCount = 0;
+            openAdmin();
+        }
+    };
 
     window.addEventListener('DOMContentLoaded', () => {
         startCountdown();
-        updateFomoDisplay();
-        
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('checkout_id') && urlParams.has('name')) {
-            savePaymentAndShowTicket(urlParams);
-        }
+        if (urlParams.has('checkout_id')) savePaymentAndShowTicket(urlParams);
     });
 
     document.getElementById('ticketForm').onsubmit = async (e) => {
@@ -133,171 +187,166 @@
         const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
         const type = document.getElementById('type').value;
-        
-        let formattedPhone = phone.replace(/\D/g, ""); 
-        if (formattedPhone.startsWith("0")) formattedPhone = "254" + formattedPhone.substring(1);
+        let fPhone = phone.replace(/\D/g, ""); if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
 
-        btn.innerText = "Opening M-Pesa...";
+        btn.innerText = "Processing...";
         btn.disabled = true;
 
-        // Initialize IntaSend
-        const intasend = new IntaSend({ 
-            publicAPIKey: INTASEND_KEY, 
-            live: false 
-        });
-
-        // Get group names
-        let groupNames = "";
-        if(type === "Group of 5") {
-            const inputs = document.querySelectorAll('.member-name');
-            groupNames = Array.from(inputs).map(i => i.value).filter(v => v !== "").join(", ");
-        }
+        const intasend = new IntaSend({ publicAPIKey: INTASEND_KEY, live: false });
+        let members = ""; if(type === "Group of 5") members = Array.from(document.querySelectorAll('.member-name')).map(i => i.value).filter(v => v).join(", ");
         
-        const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${formattedPhone}&type=${encodeURIComponent(type)}&members=${encodeURIComponent(groupNames)}`;
-
-        // Event Listeners for Intasend
-        intasend.on("COMPLETE", (results) => {
-            window.location.href = returnUrl + "&checkout_id=" + results.checkout_id;
-        });
-
-        intasend.on("FAILED", (results) => {
-            alert("Payment failed or cancelled. Please try again.");
-            btn.innerText = "Pay and Get Ticket";
-            btn.disabled = false;
-        });
-
-        // Trigger the checkout
-        intasend.run({
-            amount: PRICES[type],
-            currency: "KES",
-            phone_number: formattedPhone,
-            first_name: name,
-            email: "ticket@mutcu.com" // Required field for SDK v4
-        });
+        const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${fPhone}&type=${type}&members=${encodeURIComponent(members)}`;
+        intasend.on("COMPLETE", (res) => window.location.href = returnUrl + "&checkout_id=" + res.checkout_id);
+        intasend.run({ amount: PRICES[type], currency: "KES", phone_number: fPhone, first_name: name, payment_methods: ["MPESA"] });
     };
 
     async function savePaymentAndShowTicket(params) {
-        const statusArea = document.getElementById('statusArea');
         document.getElementById('ticketForm').classList.add('hidden');
-        statusArea.classList.remove('hidden');
-        statusArea.innerHTML = "<div style='text-align:center;'><h3>Saving your ticket...</h3></div>";
+        document.getElementById('statusArea').classList.remove('hidden');
+        document.getElementById('statusArea').innerHTML = "<p>Confirming...</p>";
 
-        const { data, error } = await _supabase.from('tickets').insert([{
+        const { data } = await _supabase.from('tickets').insert([{
             name: params.get('name'),
             phone: params.get('phone'),
             ticket_type: params.get('type'),
             mpesa_code: params.get('checkout_id'), 
             group_members: params.get('members'),
-            status: 'approved' 
+            status: 'paid',
+            admitted_count: 0 // New field for group tracking
         }]).select();
 
-        if (!error && data.length > 0) {
+        if (data) {
             renderTicket(data[0]);
             window.history.replaceState({}, document.title, window.location.pathname);
-        } else {
-            statusArea.innerHTML = `<p style="color:red;">Error: ${error?.message || "Failed to save"}</p>`;
         }
     }
 
     function renderTicket(data) {
-        const statusArea = document.getElementById('statusArea');
-        statusArea.innerHTML = `
-            <div id="printableTicket" style="background:white; padding:20px; border-radius:15px; text-align:center; color:#000; border: 2px solid #eee;">
-                <div style="background:#1a2e44; color:white; padding:5px 15px; border-radius:50px; display:inline-block; font-size:12px; margin-bottom:10px;">${data.ticket_type}</div>
-                <h2 style="margin: 5px 0; font-size:1.4rem;">MOVIE PREMIERE</h2>
-                <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
-                <div style="border-top:1px dashed #ccc; padding-top:15px;">
-                    <div style="font-weight:900; font-size:1.2rem;">${data.name}</div>
-                    <div style="font-size:11px; color:#666;">Code: ${data.mpesa_code}</div>
-                    ${data.group_members ? `<div style="font-size:10px; margin-top:8px;">Group: ${data.group_members}</div>` : ""}
-                </div>
+        const area = document.getElementById('statusArea');
+        const theme = data.ticket_type === 'VIP' ? 'ticket-vip' : (data.ticket_type === 'Group of 5' ? 'ticket-group' : 'ticket-regular');
+        area.innerHTML = `
+            <div id="printableTicket" class="${theme}" style="background:white; padding:30px 20px; border-radius:20px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div style="font-weight:800; color:#666; font-size:10px; letter-spacing:2px; margin-bottom:10px;">OFFICIAL ENTRY PASS</div>
+                <h2 style="margin:0;">FILM PREMIERE</h2>
+                <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0;"></div>
+                <div style="font-size:22px; font-weight:800; color:var(--brand-navy);">${data.name}</div>
+                <div style="margin:10px 0;"><span class="badge ${data.ticket_type === 'VIP' ? 'badge-vip' : (data.ticket_type === 'Group of 5' ? 'badge-group' : 'badge-reg')}">${data.ticket_type}</span></div>
+                <div style="font-family:monospace; font-size:12px; color:#999;">${data.mpesa_code}</div>
             </div>
-            <button onclick="downloadTicket()" style="background: #1a2e44; color: white; margin-top: 20px; width:100%; border-radius:10px; padding:15px; border:none; cursor:pointer; font-weight:bold;">💾 Download to Phone</button>
+            <button onclick="downloadTicket()" style="background:var(--brand-navy); color:white; width:100%; border:none; padding:18px; border-radius:12px; margin-top:20px; font-weight:bold; cursor:pointer;">💾 Save Ticket</button>
         `;
         new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 160, height: 160 });
     }
 
-    function toggleGroupFields() {
-        const isGroup = document.getElementById('type').value === 'Group of 5';
-        document.getElementById('groupFields').classList.toggle('hidden', !isGroup);
+    async function verifyAndCheckIn(code, bulk = false) {
+        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
+        const resultDiv = document.getElementById('scanResult');
+        
+        if (!data) { if(resultDiv) resultDiv.innerHTML = `<span style="color:var(--brand-danger)">❌ NOT FOUND</span>`; return; }
+
+        let newCount = (data.admitted_count || 0);
+        let max = data.ticket_type === 'Group of 5' ? 5 : 1;
+
+        if (newCount >= max) {
+            if(resultDiv) resultDiv.innerHTML = `<span style="color:var(--brand-gold)">⚠️ FULLY ADMITTED</span>`;
+            return;
+        }
+
+        newCount = bulk ? max : newCount + 1;
+        const newStatus = newCount >= max ? 'admitted' : 'partial';
+
+        const { error } = await _supabase.from('tickets').update({ 
+            status: newStatus, 
+            admitted_count: newCount 
+        }).eq('mpesa_code', code);
+
+        if (!error) {
+            if(resultDiv) resultDiv.innerHTML = `<span style="color:var(--brand-success)">✅ ADMITTED (${newCount}/${max})</span>`;
+            refreshAdminData();
+        }
+    }
+
+    function filterAdminTable() {
+        const query = document.getElementById('adminSearch').value.toLowerCase();
+        const filtered = allTickets.filter(t => 
+            t.name.toLowerCase().includes(query) || 
+            t.phone.includes(query) || 
+            t.mpesa_code.toLowerCase().includes(query)
+        );
+        renderAdminBody(filtered);
+    }
+
+    function renderAdminBody(data) {
+        document.getElementById('adminBody').innerHTML = data.map(t => {
+            const max = t.ticket_type === 'Group of 5' ? 5 : 1;
+            const current = t.admitted_count || 0;
+            const isFull = current >= max;
+            
+            return `<tr>
+                <td><strong>${t.name}</strong><br><small>${t.phone}</small></td>
+                <td><span class="badge ${t.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg'}">${t.ticket_type}</span></td>
+                <td><span class="badge ${isFull ? 'badge-admitted' : 'badge-reg'}">${current}/${max}</span></td>
+                <td>
+                    ${!isFull ? `<button class="action-btn" onclick="verifyAndCheckIn('${t.mpesa_code}')">Admit 1</button>` : ''}
+                    ${(!isFull && max > 1) ? `<button class="action-btn group-btn" onclick="verifyAndCheckIn('${t.mpesa_code}', true)">Admit All</button>` : ''}
+                    ${isFull ? 'Checked' : ''}
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function refreshAdminData() {
+        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
+        if (data) {
+            allTickets = data;
+            let rev = 0, admittedTotal = 0;
+            data.forEach(t => {
+                rev += (PRICES[t.ticket_type] || 0);
+                admittedTotal += (t.admitted_count || 0);
+            });
+            document.getElementById('statRevenue').innerText = rev.toLocaleString() + "/-";
+            document.getElementById('statAdmitted').innerText = admittedTotal;
+            document.getElementById('statTickets').innerText = data.length;
+            filterAdminTable();
+        }
+    }
+
+    let html5QrCode;
+    function startScanner() {
+        document.getElementById('scannerSection').classList.remove('hidden');
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (code) => verifyAndCheckIn(code));
+    }
+    function stopScanner() { if(html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerSection').classList.add('hidden')); }
+
+    async function openAdmin() {
+        if(prompt("Admin PIN:") !== "2060") return;
+        document.getElementById('adminModal').classList.remove('hidden');
+        refreshAdminData();
     }
 
     async function downloadTicket() {
         const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
-        const link = document.createElement('a');
-        link.download = `MUTCU_Ticket.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
-    async function openAdmin() {
-        const pin = prompt("Enter Admin PIN:");
-        if(pin !== "1234") return alert("Wrong PIN");
-        
-        document.getElementById('adminModal').classList.remove('hidden');
-        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
-        
-        if (data) {
-            window.adminData = data;
-            document.getElementById('adminBody').innerHTML = data.map(t => `
-                <tr>
-                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
-                    <td>${t.name}</td>
-                    <td>${t.ticket_type}</td>
-                    <td>${t.phone}</td>
-                    <td>${t.group_members || '-'}</td>
-                    <td style="font-family:monospace; font-size:11px;">${t.mpesa_code}</td>
-                </tr>
-            `).join('');
-        }
-    }
-
-    function exportCSV() {
-        if(!window.adminData) return;
-        let csv = "Date,Name,Type,Phone,Group Members,TransactionID\n";
-        window.adminData.forEach(t => {
-            csv += `${t.created_at},${t.name},${t.ticket_type},${t.phone},"${t.group_members}",${t.mpesa_code}\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'tickets_report.csv';
-        a.click();
+        const link = document.createElement('a'); link.download = `Ticket.png`; link.href = canvas.toDataURL(); link.click();
     }
 
     function startCountdown() {
-        const premiereDate = new Date("2026-02-15T18:00:00").getTime();
+        const target = new Date("2026-02-15T18:00:00").getTime();
         setInterval(() => {
-            const distance = premiereDate - new Date().getTime();
-            if (distance < 0) return;
-            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-            document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-            document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+            const d = target - new Date().getTime();
+            if (d < 0) return;
+            document.getElementById("days").innerText = Math.floor(d / 86400000).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((d % 86400000) / 3600000).toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = Math.floor((d % 3600000) / 60000).toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = Math.floor((d % 60000) / 1000).toString().padStart(2, '0');
         }, 1000);
     }
-
+    function toggleGroupFields() { document.getElementById('groupFields').classList.toggle('hidden', document.getElementById('type').value !== 'Group of 5'); }
     async function showRetrievePrompt() {
-        const code = prompt("Enter your Transaction Code / Checkout ID:");
-        if (!code) return;
+        const code = prompt("Enter Ref:"); if (!code) return;
         const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code.trim()).single();
-        if (data) {
-            document.getElementById('ticketForm').classList.add('hidden');
-            document.getElementById('statusArea').classList.remove('hidden');
-            renderTicket(data);
-        } else {
-            alert("Ticket not found.");
-        }
-    }
-
-    async function updateFomoDisplay() {
-        const type = document.getElementById('type').value;
-        const { count } = await _supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('ticket_type', type);
-        const left = CAPACITY[type] - (count || 0);
-        document.getElementById('availabilityMsg').innerText = left > 0 ? `${left} tickets left` : "SOLD OUT";
+        if (data) { renderTicket(data); document.getElementById('ticketForm').classList.add('hidden'); document.getElementById('statusArea').classList.remove('hidden'); }
     }
 </script>
-
 </body>
 </html>
