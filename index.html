@@ -9,14 +9,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --dark-bg: #050a14;
-            --card-bg: #0f172a;
             --brand-teal: #2dd4bf;
             --brand-gold: #fbbf24;
             --input-fill: #1e293b;
@@ -25,27 +23,24 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            margin: 0; 
-            font-family: 'Inter', sans-serif; 
+            margin: 0; font-family: 'Inter', sans-serif; 
             background-color: var(--dark-bg); 
             background-image: radial-gradient(circle at top, #1e293b 0%, #050a14 100%);
-            color: white;
-            display: flex; justify-content: center; min-height: 100vh; padding: 20px;
+            color: white; display: flex; justify-content: center; min-height: 100vh; padding: 10px;
         }
 
-        .container { width: 100%; max-width: 450px; }
+        .container { width: 100%; max-width: 440px; }
 
         .card { 
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 24px; padding: 30px; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px);
+            border-radius: 24px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
         header { text-align: center; margin-bottom: 25px; }
-        header img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--brand-teal); cursor: pointer; }
-        h1 { font-size: 24px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin: 0; background: linear-gradient(to right, var(--brand-teal), var(--brand-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        header img { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-teal); cursor: pointer; }
+        .mutcu-text { font-size: 10px; letter-spacing: 4px; font-weight: 800; color: var(--brand-teal); margin-top: 5px; text-transform: uppercase; }
+        h1 { font-family: 'Syncopate', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; margin: 10px 0 0 0; background: linear-gradient(to right, var(--brand-teal), var(--brand-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         .countdown-timer { 
             display: flex; justify-content: space-around; background: rgba(0, 0, 0, 0.3); 
@@ -53,243 +48,223 @@
         }
         .timer-unit { text-align: center; }
         .timer-unit span { display: block; font-size: 22px; font-weight: 800; color: var(--brand-teal); }
-        .timer-unit small { font-size: 10px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+        .timer-unit small { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
 
-        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; color: var(--brand-teal); letter-spacing: 1px; }
+        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 8px; color: var(--brand-teal); letter-spacing: 1px; text-transform: uppercase; }
         input, select { 
             width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); 
-            margin-bottom: 20px; font-size: 15px; background: var(--input-fill); color: white; transition: 0.3s;
+            margin-bottom: 15px; font-size: 15px; background: var(--input-fill); color: white; outline: none;
         }
 
         .pay-btn { 
             width: 100%; padding: 18px; border-radius: 12px; border: none; 
             background: linear-gradient(90deg, var(--brand-gold) 0%, var(--brand-teal) 100%);
-            color: #050a14; font-size: 16px; font-weight: 800; cursor: pointer; 
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            color: #050a14; font-size: 14px; font-weight: 800; cursor: pointer; 
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
-        /* Ticket Design */
-        .ticket-visual {
-            background: white; border-radius: 15px; overflow: hidden; width: 100%; max-width: 320px;
-            margin: 0 auto; color: #0f172a; position: relative;
-        }
-        .ticket-header { background: #f8fafc; padding: 15px; text-align: center; border-bottom: 2px dashed #e2e8f0; }
-        .ticket-body { padding: 20px; text-align: center; }
-        
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; }
-        .badge-vip { background: var(--brand-gold); color: black; }
-        .badge-reg { background: var(--brand-teal); color: black; }
+        /* --- TICKET STYLING --- */
+        .ticket-visual { background: #ffffff; color: #1a1a1a; border-radius: 15px; overflow: hidden; position: relative; }
+        .ticket-vip { background: #0a0a0a; color: #ffffff; border: 1px solid var(--brand-gold); }
+        .ticket-top { padding: 40px 30px; border-bottom: 2px dashed #ccc; text-align: center; }
+        .ticket-vip .ticket-top { border-bottom-color: var(--brand-gold); }
+        .guest-name { font-family: 'Playfair Display', serif; font-size: 28px; font-style: italic; margin: 10px 0; }
+        .group-list { font-size: 9px; margin-top: 10px; opacity: 0.8; font-weight: 600; text-transform: uppercase; color: #444; line-height: 1.3; }
+        .ticket-vip .group-list { color: #bbb; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 8px; font-weight: 800; text-transform: uppercase; border: 1px solid #ddd; margin-top: 10px; }
+        .ticket-vip .badge { border-color: var(--brand-gold); color: var(--brand-gold); }
+        .ticket-bottom { padding: 30px; text-align: center; }
+        .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; }
+
+        /* --- ADMIN PANEL --- */
+        .admin-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .stat-card small { font-size: 9px; color: var(--brand-teal); display: block; margin-bottom: 4px; }
+        .stat-card div { font-size: 16px; font-weight: 800; }
+        .search-box { width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; margin-bottom: 10px; font-size: 12px; }
+        .admin-list { max-height: 350px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; }
+        .guest-row { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 11px; }
+        .guest-row:last-child { border: none; }
+        .row-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .squad-text { color: var(--brand-gold); margin-top: 5px; font-size: 10px; display: block; font-style: italic; }
 
         .hidden { display: none !important; }
-        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--brand-teal); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Admin UI */
-        .admin-modal { position: fixed; inset: 0; background: var(--dark-bg); z-index: 2000; padding: 20px; overflow-y: auto; color: white; }
-        .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .admin-stat-box { background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        .admin-table th { text-align: left; color: var(--brand-teal); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .admin-table td { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .help-btn { position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: white; padding: 10px 20px; border-radius: 50px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card">
-        <div id="customerView">
+        <div id="appBody">
             <header>
-                <img src="./logo.webp" alt="Logo" id="adminTrigger">
-                <h1>Film Premiere</h1>
+                <img src="./logo.webp" alt="Logo" onclick="openAdmin()">
+                <div class="mutcu-text">MUTCU</div>
+                <h1 id="pageTitle">Film Premiere</h1>
             </header>
 
-            <div class="countdown-timer">
-                <div class="timer-unit"><span id="days">00</span><small>Days</small></div>
-                <div class="timer-unit"><span id="hours">00</span><small>Hrs</small></div>
-                <div class="timer-unit"><span id="minutes">00</span><small>Min</small></div>
-                <div class="timer-unit"><span id="seconds">00</span><small>Sec</small></div>
+            <div id="dynamicView">
+                <div class="countdown-timer">
+                    <div class="timer-unit"><span id="days">00</span><small>Days</small></div>
+                    <div class="timer-unit"><span id="hours">00</span><small>Hrs</small></div>
+                    <div class="timer-unit"><span id="minutes">00</span><small>Min</small></div>
+                    <div class="timer-unit"><span id="seconds">00</span><small>Sec</small></div>
+                </div>
+
+                <form id="ticketForm">
+                    <label>Full Name</label>
+                    <input type="text" id="name" placeholder="Name for Invite" required>
+                    <label>M-Pesa Number</label>
+                    <input type="tel" id="phone" placeholder="07xx xxx xxx" required>
+                    <label>Ticket Type</label>
+                    <select id="type" onchange="toggleGroup()">
+                        <option value="Regular">Regular - 100/-</option>
+                        <option value="VIP">VIP - 200/-</option>
+                        <option value="Group of 5">Group (5 People) - 400/-</option>
+                    </select>
+                    <div id="groupInput" class="hidden">
+                        <label>Member Names</label>
+                        <input type="text" id="squad" placeholder="Alice, Bob, Charlie...">
+                    </div>
+                    <button type="submit" id="payBtn" class="pay-btn"> GET TICKET</button>
+                    <p style="text-align:center; font-size:11px; margin-top:20px; color:rgba(255,255,255,0.3); cursor:pointer" onclick="findTicket()">
+                        Lost Your Ticket? <span style="color:var(--brand-teal)">Find it here</span>
+                    </p>
+                </form>
             </div>
-
-            <form id="ticketForm">
-                <label>FULL NAME</label>
-                <input type="text" id="name" placeholder="Enter your name" required>
-                <label>PHONE NUMBER (M-PESA)</label>
-                <input type="tel" id="phone" placeholder="0712345678" required>
-                <label>TICKET CATEGORY</label>
-                <select id="type" onchange="toggleGroupFields();">
-                    <option value="Regular">Regular Ticket - 100/-</option>
-                    <option value="VIP">VIP Ticket - 200/-</option>
-                    <option value="Group of 5">Group of 5 - 400/-</option>
-                </select>
-
-                <div id="groupFields" class="hidden">
-                    <label>GROUP MEMBERS</label>
-                    <input type="text" class="member-name" placeholder="Name 2">
-                    <input type="text" class="member-name" placeholder="Name 3">
-                </div>
-                
-                <div style="text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 15px;">
-                    Tickets remaining: <span id="ticketCount">Loading...</span>
-                </div>
-
-                <button type="submit" id="submitBtn" class="pay-btn">Pay and Get Ticket</button>
-                <p style="text-align:center; font-size:11px; margin-top:20px; color:rgba(255,255,255,0.4); cursor:pointer" onclick="showEasyRetrieve()">
-                    LOST YOUR TICKET? <span style="color:var(--brand-teal)">FIND IT HERE</span>
-                </p>
-            </form>
-            <div id="statusArea" class="hidden"></div>
         </div>
     </div>
 </div>
-
-<div id="adminModal" class="admin-modal hidden">
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0; color:var(--brand-teal)">Gate Control</h2>
-        <button onclick="document.getElementById('adminModal').classList.add('hidden')" style="background:none; border:1px solid #ef4444; color:#ef4444; padding:5px 15px; border-radius:8px;">Close</button>
-    </div>
-    <div class="admin-stat-grid">
-        <div class="admin-stat-box"><small>REVENUE</small><div id="statRevenue" style="font-size:20px; font-weight:800; color:var(--brand-gold)">0</div></div>
-        <div class="admin-stat-box"><small>ADMITTED</small><div id="statAdmitted" style="font-size:20px; font-weight:800;">0</div></div>
-    </div>
-    <div id="reader"></div>
-    <table class="admin-table">
-        <thead><tr><th>Guest</th><th>Type</th><th>Ref</th></tr></thead>
-        <tbody id="adminBody"></tbody>
-    </table>
-</div>
-
-<a href="#" class="help-btn">Need Help?</a>
 
 <script>
     const SUPABASE_URL = "https://somzfvdzwpdexxixyltl.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvbXpmdmR6d3BkZXh4aXh5bHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjY0NjQsImV4cCI6MjA4MzUwMjQ2NH0.Q0WfNnyPMDmRvJhR1Mn-GEVhElcBAJS-tySRHcyQ2Ww"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
-    const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
 
-    let adminClickCount = 0;
+    let allTickets = []; // Cache for Admin
 
-    document.getElementById('adminTrigger').onclick = () => {
-        adminClickCount++;
-        if (adminClickCount >= 5) { adminClickCount = 0; openAdmin(); }
-        setTimeout(() => adminClickCount = 0, 3000);
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-        startCountdown();
-        updateTicketCount();
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('checkout_id')) {
-            const data = {
-                name: urlParams.get('name'),
-                phone: urlParams.get('phone'),
-                ticket_type: urlParams.get('type'),
-                mpesa_code: urlParams.get('checkout_id'),
-                group_members: urlParams.get('members')
-            };
-            saveAndShow(data);
-        }
-    });
+    function toggleGroup() {
+        const isGrp = document.getElementById('type').value === 'Group of 5';
+        document.getElementById('groupInput').classList.toggle('hidden', !isGrp);
+    }
 
     document.getElementById('ticketForm').onsubmit = async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
+        const btn = document.getElementById('payBtn');
         const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
+        const phoneRaw = document.getElementById('phone').value.replace(/\D/g, "");
         const type = document.getElementById('type').value;
-        let fPhone = phone.replace(/\D/g, ""); if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
+        const squad = document.getElementById('squad').value;
+        
+        let phone = phoneRaw.startsWith("0") ? "254" + phoneRaw.substring(1) : phoneRaw;
+        btn.innerText = "WAITING FOR MPESA...";
+        btn.disabled = true;
 
-        btn.innerText = "REDIRECTING..."; btn.disabled = true;
         const intasend = new IntaSend({ publicAPIKey: INTASEND_KEY, live: false });
-        let members = Array.from(document.querySelectorAll('.member-name')).map(i => i.value).filter(v => v).join(", ");
-        const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${fPhone}&type=${encodeURIComponent(type)}&members=${encodeURIComponent(members)}`;
-        intasend.on("COMPLETE", (res) => { window.location.href = returnUrl + "&checkout_id=" + res.checkout_id; });
-        intasend.run({ amount: PRICES[type], currency: "KES", phone_number: fPhone, first_name: name, payment_methods: ["MPESA"] });
+        intasend.on("COMPLETE", async (res) => {
+            const code = res.tracking_id || "MUTCU-" + Math.random().toString(36).substr(2,7).toUpperCase();
+            const { data } = await _supabase.from('tickets').insert([{ name, phone, ticket_type: type, mpesa_code: code, notes: squad }]).select();
+            renderTicket(data[0]);
+        });
+        intasend.run({ amount: (type==="Regular"?100:type==="VIP"?200:400), currency: "KES", phone_number: phone, first_name: name });
     };
 
-    async function saveAndShow(ticketObj) {
-        document.getElementById('ticketForm').classList.add('hidden');
-        const area = document.getElementById('statusArea');
-        area.classList.remove('hidden');
-        area.innerHTML = `<div style="text-align:center;"><div class="spinner"></div><p>Generating Your Pass...</p></div>`;
-
-        await _supabase.from('tickets').upsert([{
-            ...ticketObj,
-            status: 'paid',
-            admitted_count: 0
-        }], { onConflict: 'mpesa_code' });
-
-        renderTicket(ticketObj);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
     function renderTicket(data) {
-        const area = document.getElementById('statusArea');
-        area.innerHTML = `
-            <div id="printableTicket" class="ticket-visual">
-                <div class="ticket-header"><div style="font-size: 10px; font-weight: 800; opacity: 0.5;">FILM PREMIERE 2026</div></div>
-                <div class="ticket-body">
-                    <div style="font-size: 22px; font-weight: 800; margin-bottom: 5px; color:#0f172a;">${data.name}</div>
-                    <span class="badge ${data.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg'}">${data.ticket_type}</span>
-                    <div id="qrcode" style="display:flex; justify-content:center; margin: 15px 0;"></div>
-                    <div style="font-family: monospace; font-size: 10px; opacity: 0.6; color:#0f172a;">REF: ${data.mpesa_code}</div>
+        const isVIP = data.ticket_type === 'VIP';
+        document.getElementById('dynamicView').innerHTML = `
+            <div id="capture" class="ticket-visual ${isVIP ? 'ticket-vip' : ''}">
+                <div class="ticket-top">
+                    <div style="color:var(--brand-gold); font-size:10px;">★★★★★</div>
+                    <div class="guest-name">${data.name}</div>
+                    ${data.notes ? `<div class="group-list">SQUAD: ${data.notes}</div>` : ''}
+                    <div class="badge">${data.ticket_type} ADMIT</div>
+                </div>
+                <div class="ticket-bottom">
+                    <div class="qr-wrapper"><div id="qrcode"></div></div>
+                    <div style="margin-top:10px; font-size:9px; opacity:0.5; font-weight:800;">TICKET ID: ${data.mpesa_code}</div>
                 </div>
             </div>
-            <button onclick="downloadTicket()" class="pay-btn" style="margin-top: 20px;">Download Ticket</button>
-            <button onclick="location.reload()" style="background:transparent; border:none; color:white; font-size:12px; margin-top:10px; width:100%; cursor:pointer;">← Buy another ticket</button>
+            <button id="dlBtn" onclick="download()" class="pay-btn" style="background:var(--brand-teal); margin-top:20px;">SAVE TO GALLERY</button>
+            <button onclick="location.reload()" style="background:transparent; border:none; color:white; width:100%; margin-top:15px; opacity:0.5; font-size:11px;">BACK</button>
         `;
-        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 140, height: 140 });
+        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 120, height: 120 });
     }
 
-    // UPDATED: Easier Retrieval (Phone or Code)
-    async function showEasyRetrieve() {
-        const input = prompt("Enter your Phone Number (07...) or M-Pesa Code:");
-        if (!input) return;
-
-        const cleanInput = input.trim();
-        let query;
-
-        // Check if input looks like a phone number
-        if (/^\d{9,12}$/.test(cleanInput)) {
-            let fPhone = cleanInput;
-            if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
-            query = _supabase.from('tickets').select('*').eq('phone', fPhone).order('created_at', { ascending: false }).limit(1);
-        } else {
-            // Otherwise treat as M-Pesa Code
-            query = _supabase.from('tickets').select('*').eq('mpesa_code', cleanInput).limit(1);
-        }
-
-        const { data, error } = await query.single();
-
-        if (data) { 
-            renderTicket(data); 
-            document.getElementById('ticketForm').classList.add('hidden'); 
-            document.getElementById('statusArea').classList.remove('hidden'); 
-        } else {
-            alert("Sorry, no ticket found with those details. Please check and try again.");
-        }
+    async function download() {
+        const canvas = await html2canvas(document.getElementById('capture'), { scale: 3 });
+        const a = document.createElement('a');
+        a.download = 'MUTCU_Ticket.png';
+        a.href = canvas.toDataURL();
+        a.click();
     }
 
+    async function findTicket() {
+        const p = prompt("Enter Phone Number (07...):");
+        if (!p) return;
+        let fP = p.replace(/\D/g, ""); if (fP.startsWith("0")) fP = "254" + fP.substring(1);
+        const { data } = await _supabase.from('tickets').select('*').eq('phone', fP).order('created_at', { ascending: false }).limit(1).single();
+        if (data) renderTicket(data); else alert("Ticket not found.");
+    }
+
+    // --- ADMIN MASTER DASHBOARD ---
     async function openAdmin() {
-        if(prompt("Admin PIN:") === "2060") {
-            document.getElementById('adminModal').classList.remove('hidden');
-            const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
-            document.getElementById('adminBody').innerHTML = data.map(t => `
-                <tr><td>${t.name}</td><td>${t.ticket_type}</td><td>${t.mpesa_code}</td></tr>
-            `).join('');
+        if (prompt("Admin Password:") !== "MUTCU2026") return;
+        document.getElementById('pageTitle').innerText = "ADMIN PANEL";
+        document.getElementById('dynamicView').innerHTML = `<p style="text-align:center;">Loading Records...</p>`;
+        
+        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
+        allTickets = data;
+        renderAdminUI();
+    }
+
+    function renderAdminUI(filterData = null) {
+        const displayData = filterData || allTickets;
+        let rev = 0;
+        displayData.forEach(t => rev += (t.ticket_type==="Regular"?100:t.ticket_type==="VIP"?200:400));
+
+        const listRows = displayData.map(t => `
+            <div class="guest-row">
+                <div class="row-top">
+                    <div><strong>${t.name}</strong><br><small>${t.phone}</small></div>
+                    <div style="text-align:right"><strong>${t.ticket_type}</strong><br><span style="color:var(--brand-teal)">${t.mpesa_code}</span></div>
+                </div>
+                ${t.notes ? `<span class="squad-text">Squad: ${t.notes}</span>` : ''}
+            </div>
+        `).join('');
+
+        document.getElementById('dynamicView').innerHTML = `
+            <div class="admin-stats">
+                <div class="stat-card"><small>Revenue</small><div>KES ${rev}</div></div>
+                <div class="stat-card"><small>Total Sales</small><div>${displayData.length}</div></div>
+            </div>
+            
+            <input type="text" class="search-box" placeholder="Search name or phone..." onkeyup="filterAdmin(this.value)">
+            
+            <div class="admin-list" id="adminList">${listRows || '<p style="padding:20px; text-align:center; opacity:0.5;">No records found.</p>'}</div>
+            
+            <button onclick="simulateScanner()" class="pay-btn" style="background:#475569; margin-top:15px; font-size:11px;">OPEN CODE SCANNER</button>
+            <button onclick="location.reload()" style="background:transparent; border:none; color:white; width:100%; margin-top:15px; opacity:0.5; font-size:11px;">EXIT ADMIN</button>
+        `;
+    }
+
+    function filterAdmin(query) {
+        const filtered = allTickets.filter(t => 
+            t.name.toLowerCase().includes(query.toLowerCase()) || 
+            t.phone.includes(query) || 
+            t.mpesa_code.toLowerCase().includes(query.toLowerCase())
+        );
+        renderAdminUI(filtered);
+    }
+
+    function simulateScanner() {
+        const code = prompt("Scan/Type Ticket Code:");
+        if (!code) return;
+        const found = allTickets.find(t => t.mpesa_code === code);
+        if (found) {
+            alert(`✅ VALID TICKET\nGuest: ${found.name}\nType: ${found.ticket_type}`);
+        } else {
+            alert("❌ INVALID OR NOT FOUND");
         }
-    }
-
-    async function updateTicketCount() {
-        const { count } = await _supabase.from('tickets').select('*', { count: 'exact', head: true });
-        document.getElementById('ticketCount').innerText = 50 - (count || 0);
-    }
-
-    async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
-        const link = document.createElement('a'); link.download = `Ticket_${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
     }
 
     function startCountdown() {
@@ -297,14 +272,13 @@
         setInterval(() => {
             const d = target - new Date().getTime();
             if (d < 0) return;
-            document.getElementById("days").innerText = Math.floor(d / 86400000).toString().padStart(2, '0');
-            document.getElementById("hours").innerText = Math.floor((d % 86400000) / 3600000).toString().padStart(2, '0');
-            document.getElementById("minutes").innerText = Math.floor((d % 3600000) / 60000).toString().padStart(2, '0');
-            document.getElementById("seconds").innerText = Math.floor((d % 60000) / 1000).toString().padStart(2, '0');
+            document.getElementById("days").innerText = Math.floor(d/86400000).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((d%86400000)/3600000).toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = Math.floor((d%3600000)/60000).toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = Math.floor((d%60000)/1000).toString().padStart(2, '0');
         }, 1000);
     }
-
-    function toggleGroupFields() { document.getElementById('groupFields').classList.toggle('hidden', document.getElementById('type').value !== 'Group of 5'); }
+    window.onload = startCountdown;
 </script>
 </body>
 </html>
