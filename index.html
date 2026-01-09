@@ -11,56 +11,104 @@
     <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     
-    <link rel="stylesheet" href="./style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --admin-bg: #f8fafc;
-            --admin-card: #ffffff;
-            --admin-accent: #0ea5e9;
-            --admin-text: #1e293b;
+            --brand-teal: #008080;
             --brand-gold: #d4af37;
-            --brand-success: #10b981;
-            --brand-danger: #ef4444;
+            --brand-navy: #001f3f;
+            --bg-light: #f1f5f9;
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-light); 
+            color: var(--brand-navy);
+            display: flex; justify-content: center; padding: 20px;
+        }
+
+        .container { width: 100%; max-width: 450px; }
+
+        /* Main Card */
+        .card { 
+            background: white; border-radius: 24px; padding: 30px; 
+            box-shadow: 0 20px 40px rgba(0,31,63,0.1); border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        header { text-align: center; margin-bottom: 25px; }
+        .brand-name { font-weight: 800; letter-spacing: 4px; color: var(--brand-teal); font-size: 14px; margin-bottom: 5px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 28px; margin: 0; color: var(--brand-navy); }
+
+        /* Timer */
+        .countdown-timer { 
+            display: flex; justify-content: space-around; background: var(--brand-navy); 
+            padding: 15px; border-radius: 16px; color: white; margin-bottom: 25px;
+        }
+        .timer-unit span { display: block; font-size: 20px; font-weight: 800; }
+        .timer-unit small { font-size: 10px; opacity: 0.7; text-transform: uppercase; }
+
+        /* Form Styling */
+        label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #64748b; }
+        input, select { 
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; 
+            margin-bottom: 20px; font-size: 16px; transition: 0.3s;
+        }
+        input:focus { border-color: var(--brand-teal); outline: none; box-shadow: 0 0 0 3px rgba(0,128,128,0.1); }
+
+        button { 
+            width: 100%; padding: 16px; border-radius: 12px; border: none; 
+            background: var(--brand-teal); color: white; font-size: 16px; 
+            font-weight: 700; cursor: pointer; transition: 0.3s; 
+        }
+        button:active { transform: scale(0.98); }
+
+        /* PREMIUM TICKET STYLE */
+        .ticket-visual {
+            background: white; border-radius: 20px; position: relative;
+            overflow: hidden; width: 320px; margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        /* Side Punch Holes */
+        .ticket-visual::before, .ticket-visual::after {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            background: var(--bg-light); border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 2;
+        }
+        .ticket-visual::before { left: -10px; }
+        .ticket-visual::after { right: -10px; }
+
+        .ticket-header { padding: 25px 20px; border-bottom: 2px dashed #e2e8f0; text-align: center; }
+        .ticket-body { padding: 25px 20px; text-align: center; }
+
+        /* Category Themes */
+        .theme-regular { border-top: 8px solid var(--brand-teal); }
+        .theme-vip { border-top: 8px solid var(--brand-gold); background: #fffdf5; }
+        .theme-group { border-top: 8px solid #166534; }
+
+        .vip-star { color: var(--brand-gold); font-size: 24px; margin-bottom: 5px; }
+        .guest-name { font-family: 'Playfair Display', serif; font-size: 22px; margin: 10px 0; }
+        .badge { 
+            display: inline-block; padding: 5px 12px; border-radius: 20px; 
+            font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .badge-vip { background: var(--brand-gold); color: white; }
+        .badge-reg { background: var(--brand-teal); color: white; }
+
         .hidden { display: none !important; }
-        
-        /* Ticket Themes */
-        .ticket-regular { border-top: 10px solid var(--brand-teal) !important; }
-        .ticket-vip { border-top: 10px solid var(--brand-gold) !important; background: linear-gradient(to bottom, #fffcf5, #ffffff) !important; position: relative; }
-        .ticket-vip::after { content: '★'; position: absolute; top: 10px; right: 20px; color: var(--brand-gold); font-size: 20px; }
-        .ticket-group { border-top: 10px solid #166534 !important; }
-
-        /* Admin Dashboard Styles */
-        .admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--admin-bg); z-index: 1000; color: var(--admin-text); font-family: 'Inter', sans-serif; overflow-y: auto; }
-        .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: var(--admin-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .stat-card small { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 10px; }
-        .stat-card div { font-size: 24px; font-weight: 800; }
-
-        .admin-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-input { flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
-
-        .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .admin-table th { background: #f1f5f9; padding: 15px; text-align: left; font-size: 13px; }
-        .admin-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
-
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .badge-reg { background: #e0f2fe; color: #0369a1; }
-        .badge-vip { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-        .badge-group { background: #f0fdf4; color: #166534; }
-        .badge-admitted { background: #dcfce7; color: #15803d; border: 1px solid #bef267; }
-
-        .action-btn { background: var(--brand-teal); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
-        .action-btn:hover { opacity: 0.8; }
-        .group-btn { background: #166534; margin-left: 5px; }
-        
-        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 15px; overflow: hidden; border: 2px solid var(--brand-teal); }
-        .secret-trigger { cursor: default; user-select: none; }
-
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--brand-teal); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        .spinner { 
+            width: 40px; height: 40px; border: 4px solid #f3f3f3; 
+            border-top: 4px solid var(--brand-teal); border-radius: 50%; 
+            animation: spin 1s linear infinite; margin: 20px auto; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Admin Styles */
+        .admin-modal { position: fixed; inset: 0; background: white; z-index: 2000; padding: 20px; overflow-y: auto; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-box { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -69,10 +117,10 @@
     <div class="card">
         <div id="customerView">
             <header>
-                <div id="adminTrigger" class="secret-trigger" style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--brand-teal); padding: 4px; background: white; display: flex; align-items: center; justify-content: center;">
-                    <img src="./logo.webp" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: contain;">
+                <div id="adminTrigger" style="width: 70px; height: 70px; margin: 0 auto 10px; cursor: pointer;">
+                    <img src="./logo.webp" alt="Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                 </div>
-                <div class="brand-name">MUTCU</div>
+                <div class="brand-name">MUTCU PRESENTS</div>
                 <h1>Film Premiere</h1>
             </header>
 
@@ -84,30 +132,30 @@
             </div>
 
             <form id="ticketForm">
-                <label>Full Name</label>
-                <input type="text" id="name" placeholder="Enter your name" required>
+                <label>FULL NAME</label>
+                <input type="text" id="name" placeholder="John Doe" required>
                 
-                <label>Phone Number (M-Pesa)</label>
+                <label>M-PESA PHONE NUMBER</label>
                 <input type="tel" id="phone" placeholder="0712345678" required>
                 
-                <label>Ticket Category</label>
+                <label>TICKET TYPE</label>
                 <select id="type" onchange="toggleGroupFields();">
-                    <option value="Regular">Regular Ticket - 100/-</option>
-                    <option value="VIP">VIP Ticket - 200/-</option>
-                    <option value="Group of 5">Group of 5 - 400/-</option>
+                    <option value="Regular">Regular - KSH 100</option>
+                    <option value="VIP">VIP Experience - KSH 200</option>
+                    <option value="Group of 5">Group Discount - KSH 400</option>
                 </select>
 
-                <div id="groupFields" class="hidden" style="margin-top: 15px; background: #f4f7f6; padding: 15px; border-radius: 10px;">
-                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Group Member Names:</p>
-                    <input type="text" class="member-name member-input" placeholder="Member 2">
-                    <input type="text" class="member-name member-input" placeholder="Member 3">
-                    <input type="text" class="member-name member-input" placeholder="Member 4">
-                    <input type="text" class="member-name member-input" placeholder="Member 5">
+                <div id="groupFields" class="hidden" style="background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                    <label>LIST MEMBER NAMES</label>
+                    <input type="text" class="member-name" placeholder="Member 2">
+                    <input type="text" class="member-name" placeholder="Member 3">
+                    <input type="text" class="member-name" placeholder="Member 4">
+                    <input type="text" class="member-name" placeholder="Member 5">
                 </div>
                 
-                <button type="submit" id="submitBtn">Pay and Get Ticket</button>
-                <p style="text-align:center; font-size:12px; margin-top:25px; cursor:pointer" onclick="showRetrievePrompt()">
-                    Already paid? <span style="color:var(--brand-teal); font-weight: 700;">Retrieve ticket</span>
+                <button type="submit" id="submitBtn">PURCHASE TICKET</button>
+                <p style="text-align:center; font-size:12px; margin-top:20px; color:#64748b; cursor:pointer" onclick="showRetrievePrompt()">
+                    LOST YOUR TICKET? <b>RETRIEVE HERE</b>
                 </p>
             </form>
 
@@ -117,67 +165,41 @@
 </div>
 
 <div id="adminModal" class="admin-modal hidden">
-    <div class="admin-container">
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 25px;">
-            <h1 style="margin:0; font-size: 24px;">Gate Control</h1>
-            <div style="display:flex; gap: 10px;">
-                <button onclick="startScanner()" style="background: var(--brand-teal); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor:pointer; font-weight: 700;">📷 QR Scanner</button>
-                <button onclick="document.getElementById('adminModal').classList.add('hidden')" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor:pointer;">Exit</button>
-            </div>
-        </div>
-
-        <div id="scannerSection" class="hidden" style="margin-bottom: 30px; text-align: center; background: #111; padding: 30px; border-radius: 20px;">
-            <div id="reader"></div>
-            <div id="scanResult" style="margin-top: 20px; color: white; font-weight: bold;"></div>
-            <button onclick="stopScanner()" style="margin-top: 15px; background: #fff; padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer;">Close Scanner</button>
-        </div>
-
-        <div class="admin-stats">
-            <div class="stat-card"><small>Revenue</small><div id="statRevenue">0</div></div>
-            <div class="stat-card"><small>Guests Inside</small><div id="statAdmitted">0</div></div>
-            <div class="stat-card"><small>Total Sold</small><div id="statTickets">0</div></div>
-        </div>
-
-        <div class="admin-controls">
-            <input type="text" id="adminSearch" class="search-input" placeholder="Search guest..." oninput="filterAdminTable()">
-        </div>
-
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Guest</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="adminBody"></tbody>
-        </table>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0">Gate Control</h2>
+        <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#ef4444;">Exit</button>
     </div>
+    <div class="stat-grid">
+        <div class="stat-box"><small>TOTAL REVENUE</small><div id="statRevenue" style="font-size:20px; font-weight:800;">0</div></div>
+        <div class="stat-box"><small>GUESTS INSIDE</small><div id="statAdmitted" style="font-size:20px; font-weight:800;">0</div></div>
+    </div>
+    <button onclick="startScanner()" style="margin-bottom:20px; background:var(--brand-navy);">📷 OPEN SCANNER</button>
+    <div id="reader"></div>
+    <div id="adminBody"></div>
 </div>
 
 <script>
     const SUPABASE_URL = "https://somzfvdzwpdexxixyltl.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvbXpmdmR6d3BkZXh4aXh5bHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjY0NjQsImV4cCI6MjA4MzUwMjQ2NH0.Q0WfNnyPMDmRvJhR1Mn-GEVhElcBAJS-tySRHcyQ2Ww"; 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     const INTASEND_KEY = "ISPubKey_test_620da1ea-5e59-4597-9308-02e9ec9a2f6d"; 
     const PRICES = { "Regular": 100, "VIP": 200, "Group of 5": 400 };
 
-    let allTickets = [];
-    let clickCount = 0;
-    let clickTimer;
+    let html5QrCode;
 
+    // Admin Toggle
+    let clickCount = 0;
     document.getElementById('adminTrigger').onclick = () => {
         clickCount++;
-        clearTimeout(clickTimer);
-        clickTimer = setTimeout(() => { clickCount = 0; }, 3000);
         if (clickCount >= 5) { clickCount = 0; openAdmin(); }
+        setTimeout(() => clickCount = 0, 3000);
     };
 
     window.addEventListener('DOMContentLoaded', () => {
         startCountdown();
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('checkout_id')) savePaymentAndShowTicket(urlParams);
+        if (urlParams.has('checkout_id')) saveAndShow(urlParams);
     });
 
     document.getElementById('ticketForm').onsubmit = async (e) => {
@@ -186,23 +208,27 @@
         const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
         const type = document.getElementById('type').value;
-        let fPhone = phone.replace(/\D/g, ""); if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
+        
+        let fPhone = phone.replace(/\D/g, ""); 
+        if (fPhone.startsWith("0")) fPhone = "254" + fPhone.substring(1);
 
-        btn.innerText = "Connecting M-Pesa...";
+        btn.innerText = "OPENING M-PESA...";
         btn.disabled = true;
 
         const intasend = new IntaSend({ publicAPIKey: INTASEND_KEY, live: false });
-        let members = ""; if(type === "Group of 5") members = Array.from(document.querySelectorAll('.member-name')).map(i => i.value).filter(v => v).join(", ");
+        let members = Array.from(document.querySelectorAll('.member-name')).map(i => i.value).filter(v => v).join(", ");
         
         const returnUrl = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&phone=${fPhone}&type=${type}&members=${encodeURIComponent(members)}`;
+        
         intasend.on("COMPLETE", (res) => { window.location.href = returnUrl + "&checkout_id=" + res.checkout_id; });
         intasend.run({ amount: PRICES[type], currency: "KES", phone_number: fPhone, first_name: name, payment_methods: ["MPESA"] });
     };
 
-    async function savePaymentAndShowTicket(params) {
+    async function saveAndShow(params) {
         document.getElementById('ticketForm').classList.add('hidden');
-        document.getElementById('statusArea').classList.remove('hidden');
-        document.getElementById('statusArea').innerHTML = `<div style="text-align:center; padding:40px 0;"><div class="spinner"></div><p>Finalizing Ticket...</p></div>`;
+        const area = document.getElementById('statusArea');
+        area.classList.remove('hidden');
+        area.innerHTML = `<div style="text-align:center;"><div class="spinner"></div><p>Generating Your Premium Pass...</p></div>`;
 
         const ticketData = {
             name: params.get('name'),
@@ -214,90 +240,74 @@
             admitted_count: 0 
         };
 
-        // Attempt save but don't wait forever
-        _supabase.from('tickets').insert([ticketData]).select().then(({ error }) => {
-            if (error) console.error("DB Save Error:", error);
-        });
-
-        // Show ticket immediately so user isn't stuck
-        setTimeout(() => {
-            renderTicket(ticketData);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }, 800);
+        await _supabase.from('tickets').upsert([ticketData], { onConflict: 'mpesa_code' });
+        renderTicket(ticketData);
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     function renderTicket(data) {
-        const area = document.getElementById('statusArea');
-        const theme = data.ticket_type === 'VIP' ? 'ticket-vip' : (data.ticket_type === 'Group of 5' ? 'ticket-group' : 'ticket-regular');
-        area.innerHTML = `
-            <div id="printableTicket" class="${theme}" style="background:white; padding:30px 20px; border-radius:20px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <div style="font-weight:800; color:#666; font-size:10px; letter-spacing:2px; margin-bottom:10px;">OFFICIAL ENTRY PASS</div>
-                <h2 style="margin:0;">FILM PREMIERE</h2>
-                <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0;"></div>
-                <div style="font-size:22px; font-weight:800; color:var(--brand-navy);">${data.name}</div>
-                <div style="margin:10px 0;"><span class="badge ${data.ticket_type === 'VIP' ? 'badge-vip' : (data.ticket_type === 'Group of 5' ? 'badge-group' : 'badge-reg')}">${data.ticket_type}</span></div>
-                <div style="font-family:monospace; font-size:12px; color:#999;">${data.mpesa_code}</div>
+        const theme = data.ticket_type === 'VIP' ? 'theme-vip' : (data.ticket_type === 'Group of 5' ? 'theme-group' : 'theme-regular');
+        const badgeClass = data.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg';
+        
+        document.getElementById('statusArea').innerHTML = `
+            <div id="printableTicket" class="ticket-visual ${theme}">
+                <div class="ticket-header">
+                    <div style="font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #94a3b8; margin-bottom: 5px;">OFFICIAL ENTRY PASS</div>
+                    <div style="font-family: 'Playfair Display', serif; font-size: 20px;">Film Premiere 2026</div>
+                </div>
+                <div class="ticket-body">
+                    ${data.ticket_type === 'VIP' ? '<div class="vip-star">★</div>' : ''}
+                    <div class="guest-name">${data.name}</div>
+                    <div style="margin-bottom: 20px;">
+                        <span class="badge ${badgeClass}">${data.ticket_type}</span>
+                    </div>
+                    <div id="qrcode" style="display:flex; justify-content:center; margin-bottom: 15px;"></div>
+                    <div style="font-family: monospace; font-size: 11px; color: #94a3b8;">REF: ${data.mpesa_code}</div>
+                </div>
             </div>
-            <button onclick="downloadTicket()" style="background:var(--brand-navy); color:white; width:100%; border:none; padding:18px; border-radius:12px; margin-top:20px; font-weight:bold; cursor:pointer;">💾 Save Ticket</button>
+            <button onclick="downloadTicket()" style="margin-top: 25px; background: var(--brand-navy);">💾 SAVE TICKET TO GALLERY</button>
         `;
-        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 160, height: 160 });
+        new QRCode(document.getElementById("qrcode"), { text: data.mpesa_code, width: 140, height: 140, colorDark: "#001f3f" });
     }
 
-    async function verifyAndCheckIn(code, bulk = false) {
+    // Admin & Support
+    async function verifyAndCheckIn(code) {
         const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code).single();
-        if (!data) return;
+        if (!data) return alert("Ticket Not Found!");
         let max = data.ticket_type === 'Group of 5' ? 5 : 1;
-        let newCount = bulk ? max : (data.admitted_count || 0) + 1;
-        if (newCount > max) return;
-        await _supabase.from('tickets').update({ status: newCount >= max ? 'admitted' : 'partial', admitted_count: newCount }).eq('mpesa_code', code);
+        if ((data.admitted_count || 0) >= max) return alert("Already Used!");
+        
+        await _supabase.from('tickets').update({ status: 'admitted', admitted_count: (data.admitted_count || 0) + 1 }).eq('mpesa_code', code);
+        alert(`ACCESS GRANTED: ${data.name}`);
         refreshAdminData();
     }
 
-    function renderAdminBody(data) {
-        document.getElementById('adminBody').innerHTML = data.map(t => {
-            const max = t.ticket_type === 'Group of 5' ? 5 : 1;
-            const current = t.admitted_count || 0;
-            return `<tr>
-                <td><strong>${t.name}</strong><br><small>${t.phone}</small></td>
-                <td><span class="badge ${t.ticket_type === 'VIP' ? 'badge-vip' : 'badge-reg'}">${t.ticket_type}</span></td>
-                <td><span class="badge ${current >= max ? 'badge-admitted' : 'badge-reg'}">${current}/${max}</span></td>
-                <td>
-                    ${current < max ? `<button class="action-btn" onclick="verifyAndCheckIn('${t.mpesa_code}')">Admit 1</button>` : 'Check'}
-                    ${(current < max && max > 1) ? `<button class="action-btn group-btn" onclick="verifyAndCheckIn('${t.mpesa_code}', true)">Full</button>` : ''}
-                </td>
-            </tr>`;
-        }).join('');
-    }
-
     async function refreshAdminData() {
-        const { data } = await _supabase.from('tickets').select('*').order('created_at', { ascending: false });
+        const { data } = await _supabase.from('tickets').select('*');
         if (data) {
-            allTickets = data;
-            let rev = 0, adm = 0;
-            data.forEach(t => { rev += (PRICES[t.ticket_type] || 0); adm += (t.admitted_count || 0); });
-            document.getElementById('statRevenue').innerText = rev + "/-";
-            document.getElementById('statAdmitted').innerText = adm;
-            document.getElementById('statTickets').innerText = data.length;
-            renderAdminBody(allTickets);
+            document.getElementById('statRevenue').innerText = "KSH " + data.reduce((acc, t) => acc + (PRICES[t.ticket_type] || 0), 0);
+            document.getElementById('statAdmitted').innerText = data.reduce((acc, t) => acc + (t.admitted_count || 0), 0);
         }
     }
 
     function startScanner() {
-        document.getElementById('scannerSection').classList.remove('hidden');
         html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (code) => verifyAndCheckIn(code));
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (code) => { verifyAndCheckIn(code); html5QrCode.stop(); });
     }
-    function stopScanner() { if(html5QrCode) html5QrCode.stop().then(() => document.getElementById('scannerSection').classList.add('hidden')); }
 
     async function openAdmin() {
-        if(prompt("PIN:") !== "2060") return;
-        document.getElementById('adminModal').classList.remove('hidden');
-        refreshAdminData();
+        if(prompt("PIN:") === "2060") {
+            document.getElementById('adminModal').classList.remove('hidden');
+            refreshAdminData();
+        }
     }
 
     async function downloadTicket() {
-        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3 });
-        const link = document.createElement('a'); link.download = `Ticket.png`; link.href = canvas.toDataURL(); link.click();
+        const canvas = await html2canvas(document.getElementById('printableTicket'), { scale: 3, useCORS: true });
+        const link = document.createElement('a');
+        link.download = `Premiere_Ticket_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
     }
 
     function startCountdown() {
@@ -311,16 +321,20 @@
             document.getElementById("seconds").innerText = Math.floor((d % 60000) / 1000).toString().padStart(2, '0');
         }, 1000);
     }
-    function toggleGroupFields() { document.getElementById('groupFields').classList.toggle('hidden', document.getElementById('type').value !== 'Group of 5'); }
-    async function showRetrievePrompt() {
-        const code = prompt("Enter Ref:"); if (!code) return;
-        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code.trim()).single();
-        if (data) { renderTicket(data); document.getElementById('ticketForm').classList.add('hidden'); document.getElementById('statusArea').classList.remove('hidden'); }
+
+    function toggleGroupFields() { 
+        document.getElementById('groupFields').classList.toggle('hidden', document.getElementById('type').value !== 'Group of 5'); 
     }
-    function filterAdminTable() {
-        const query = document.getElementById('adminSearch').value.toLowerCase();
-        const filtered = allTickets.filter(t => t.name.toLowerCase().includes(query) || t.phone.includes(query) || t.mpesa_code.toLowerCase().includes(query));
-        renderAdminBody(filtered);
+
+    async function showRetrievePrompt() {
+        const code = prompt("Enter M-Pesa Code:");
+        if (!code) return;
+        const { data } = await _supabase.from('tickets').select('*').eq('mpesa_code', code.trim()).single();
+        if (data) { 
+            renderTicket(data); 
+            document.getElementById('ticketForm').classList.add('hidden'); 
+            document.getElementById('statusArea').classList.remove('hidden'); 
+        } else { alert("Ticket not found."); }
     }
 </script>
 </body>
